@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:my_app/navigation_menu.dart';
 import 'package:my_app/pages/beranda/beranda.dart';
+import 'package:my_app/pages/donasi/donasi.dart';
 import 'package:my_app/pages/register/register.dart';
 import 'package:get/get.dart';
 
@@ -15,7 +17,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
-      home: Register(),
+      home: NavigationMenu(),
     );
   }
 }

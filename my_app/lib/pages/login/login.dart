@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/navigation_menu.dart';
 import 'package:my_app/pages/beranda/beranda.dart';
 import 'package:my_app/pages/register/widgets/custom_sign.dart';
 import 'package:my_app/utils/validator.dart';
@@ -126,7 +127,7 @@ class _LoginState extends State<Login> {
                           SizedBox(height: 20),
                           custom_button_elevated(
                             title: "Login",
-                            onTap: () => Get.to(Beranda()),
+                            onTap: () => Get.to(NavigationMenu()),
                           ),
                           SizedBox(height: 20),
                           or(
