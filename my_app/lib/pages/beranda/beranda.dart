@@ -17,7 +17,9 @@ class _BerandaState extends State<Beranda> {
     final controller = Get.put(BerandaController());
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
         leading: Icon(Icons.fastfood, size: 20, color: Colors.blue),
         title: Text(
@@ -54,6 +56,7 @@ class _BerandaState extends State<Beranda> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: 40),
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
             child: Column(
@@ -102,6 +105,145 @@ class _BerandaState extends State<Beranda> {
                       title: "Riwayat",
                       color: Colors.green,
                       icon: Icons.av_timer,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+
+                ///
+                ///Fingturs Demand
+                ///
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Donasi Terdekat",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 23,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "Lihat Semua",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_forward_ios_outlined,
+                              color: Colors.blue,
+                              size: 16,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 15),
+                    GridView.builder(
+                      itemCount: 10,
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, // 2 kolom
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 25,
+                        childAspectRatio: 0.9, // rasio kotak (lebar/tinggi)
+                      ),
+                      itemBuilder: (context, index) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                offset: Offset(0, 8),
+                                blurRadius: 20,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(15),
+                                    ),
+                                    child: Image.network(
+                                      "https://picsum.photos/200/300?random=$index",
+                                      height: 120,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Roti",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 22,
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.watch_later_outlined,
+                                              size: 15,
+                                              color: Colors.blue,
+                                            ),
+                                            SizedBox(width: 2),
+                                            Text(
+                                              "Sisa 2 hari",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                                color: Colors.blue,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.all(3),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue,
+                                            borderRadius: BorderRadius.circular(
+                                              100,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            Icons.location_on_outlined,
+                                            size: 15,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -170,13 +312,14 @@ class customContainerIcon extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.all(5),
+          padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(100),
-            color: Colors.blue.withOpacity(0.2),
+            color: Colors.blue.withOpacity(0.1),
           ),
           child: Icon(icon, color: color ?? Colors.blue, size: 40),
         ),
+        SizedBox(height: 5),
         Text(
           title,
           style: TextTheme.of(
