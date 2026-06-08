@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:my_app/pages/FoodWaste/food_waste_page.dart';
+import 'package:my_app/pages/food_waste/food_waste_page.dart';
 import 'package:my_app/pages/beranda/beranda.dart';
 import 'package:my_app/pages/profile/profile.dart';
 

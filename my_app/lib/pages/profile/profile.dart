@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:my_app/pages/profile/account_settings_page.dart';
+import 'package:my_app/pages/profile/donation_history_page.dart';
+import 'package:my_app/pages/profile/donation_received_page.dart';
+import 'package:my_app/pages/profile/help_center_page.dart';
+import 'package:my_app/pages/profile/saved_food_page.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -117,7 +123,9 @@ class Profile extends StatelessWidget {
                     title: "Riwayat Donasi",
                     subtitle:
                         "Lihat semua riwayat donasi makanan yang telah diberikan",
-                    onTap: () {},
+                    onTap: () {
+                      Get.to(() => DonationHistoryPage());
+                    },
                   ),
 
                   ProfileMenuItem(
@@ -125,7 +133,9 @@ class Profile extends StatelessWidget {
                     title: "Makanan Terselamatkan",
                     subtitle:
                         "Pantau total sisa makanan yang berhasil disalurkan",
-                    onTap: () {},
+                    onTap: () {
+                      Get.to(() => SavedFoodPage());
+                    },
                   ),
 
                   ProfileMenuItem(
@@ -133,47 +143,27 @@ class Profile extends StatelessWidget {
                     title: "Donasi Diterima",
                     subtitle:
                         "Lihat jumlah donasi yang diterima penerima manfaat",
-                    onTap: () {},
+                    onTap: () {
+                      Get.to(() => DonationReceivedPage());
+                    },
                   ),
 
                   ProfileMenuItem(
                     icon: Icons.settings_outlined,
                     title: "Pengaturan Akun",
                     subtitle: "Kelola informasi akun dan preferensi aplikasi",
-                    onTap: () {},
+                    onTap: () {
+                      Get.to(() => AccountSettingsPage());
+                    },
                   ),
 
                   ProfileMenuItem(
                     icon: Icons.support_agent_outlined,
                     title: "Pusat Bantuan",
                     subtitle: "Butuh bantuan? Hubungi kami atau lihat FAQ",
-                    onTap: () {},
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // LOGOUT BUTTON
-                  SizedBox(
-                    width: double.infinity,
-                    height: 58,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.red),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                      onPressed: () {},
-                      icon: const Icon(Icons.logout, color: Colors.red),
-                      label: const Text(
-                        "Keluar",
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
+                    onTap: () {
+                      Get.to(() => HelpCenterPage());
+                    },
                   ),
 
                   const SizedBox(height: 30),

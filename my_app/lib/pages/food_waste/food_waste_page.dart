@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:my_app/pages/food_waste/donation_status_page.dart';
 
 class FoodWastePage extends StatelessWidget {
   const FoodWastePage({super.key});
@@ -14,147 +16,152 @@ class FoodWastePage extends StatelessWidget {
       child: Scaffold(
         backgroundColor: const Color(0xffF4F7FB),
         body: SafeArea(
-          child: Column(
-            children: [
-              // =====================================
-              // HEADER
-              // =====================================
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 30),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xff0F52FF), Color(0xff3B82F6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(35),
-                    bottomRight: Radius.circular(35),
-                  ),
-                ),
-
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // TITLE
-                    Text(
-                      "Food Waste Rescue",
-                      style: Theme.of(context).textTheme.headlineSmall!
-                          .copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                // =====================================
+                // HEADER
+                // =====================================
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 30),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xff0F52FF), Color(0xff3B82F6)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-
-                    const SizedBox(height: 8),
-
-                    Text(
-                      "Temukan makanan layak konsumsi yang siap didonasikan",
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyLarge!.copyWith(color: Colors.white70),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(35),
+                      bottomRight: Radius.circular(35),
                     ),
+                  ),
 
-                    const SizedBox(height: 24),
-
-                    // SEARCH
-                    Container(
-                      height: 56,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // TITLE
+                      Text(
+                        "Food Waste Rescue",
+                        style: Theme.of(context).textTheme.headlineSmall!
+                            .copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.search, color: Colors.grey),
 
-                          const SizedBox(width: 12),
+                      const SizedBox(height: 8),
 
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "Cari makanan atau lokasi...",
-                                hintStyle: TextStyle(
-                                  color: Colors.grey.shade500,
+                      Text(
+                        "Temukan makanan layak konsumsi yang siap didonasikan",
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyLarge!.copyWith(color: Colors.white70),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // SEARCH
+                      Container(
+                        height: 56,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.search, color: Colors.grey),
+
+                            const SizedBox(width: 12),
+
+                            Expanded(
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: "Cari makanan atau lokasi...",
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey.shade500,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // =====================================
-              // CATEGORY
-              // =====================================
-              SizedBox(
-                height: 45,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
+                // =====================================
+                // CATEGORY
+                // =====================================
+                SizedBox(
+                  height: 45,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    children: const [
+                      FoodCategoryChip(title: "Semua", isSelected: true),
+                      FoodCategoryChip(title: "Nasi"),
+                      FoodCategoryChip(title: "Roti"),
+                      FoodCategoryChip(title: "Minuman"),
+                      FoodCategoryChip(title: "Sayur"),
+                      FoodCategoryChip(title: "Dessert"),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // =====================================
+                // FOOD LIST
+                // =====================================
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  children: const [
-                    FoodCategoryChip(title: "Semua", isSelected: true),
-                    FoodCategoryChip(title: "Nasi"),
-                    FoodCategoryChip(title: "Roti"),
-                    FoodCategoryChip(title: "Minuman"),
-                    FoodCategoryChip(title: "Sayur"),
-                    FoodCategoryChip(title: "Dessert"),
-                  ],
+                  child: Column(
+                    children: [
+                      FoodDonationCard(
+                        onPress: () => Get.to(
+                          () => DonationStatusPage(status: "approved"),
+                        ),
+                        donorName: "The Garden Bistro",
+                        foodName: "Nasi Box Ayam Teriyaki",
+                        portion: "20 Porsi",
+                        distance: "1.2 Km",
+                        timeLeft: "2 Jam Lagi",
+                        location: "Jakarta Selatan",
+                        statusColor: Color(0xff22C55E),
+                      ),
+
+                      FoodDonationCard(
+                        donorName: "Cafe Bread House",
+                        foodName: "Roti & Pastry",
+                        portion: "15 Porsi",
+                        distance: "2.8 Km",
+                        timeLeft: "1 Jam Lagi",
+                        location: "Bandung",
+                        statusColor: Color(0xffF59E0B),
+                      ),
+
+                      FoodDonationCard(
+                        donorName: "Hotel Grand Palace",
+                        foodName: "Buffet Breakfast",
+                        portion: "35 Porsi",
+                        distance: "4.5 Km",
+                        timeLeft: "3 Jam Lagi",
+                        location: "Jakarta Pusat",
+                        statusColor: Color(0xff22C55E),
+                      ),
+
+                      SizedBox(height: 30),
+                    ],
+                  ),
                 ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // =====================================
-              // FOOD LIST
-              // =====================================
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  children: const [
-                    FoodDonationCard(
-                      donorName: "The Garden Bistro",
-                      foodName: "Nasi Box Ayam Teriyaki",
-                      portion: "20 Porsi",
-                      distance: "1.2 Km",
-                      timeLeft: "2 Jam Lagi",
-                      location: "Jakarta Selatan",
-                      statusColor: Color(0xff22C55E),
-                    ),
-
-                    FoodDonationCard(
-                      donorName: "Cafe Bread House",
-                      foodName: "Roti & Pastry",
-                      portion: "15 Porsi",
-                      distance: "2.8 Km",
-                      timeLeft: "1 Jam Lagi",
-                      location: "Bandung",
-                      statusColor: Color(0xffF59E0B),
-                    ),
-
-                    FoodDonationCard(
-                      donorName: "Hotel Grand Palace",
-                      foodName: "Buffet Breakfast",
-                      portion: "35 Porsi",
-                      distance: "4.5 Km",
-                      timeLeft: "3 Jam Lagi",
-                      location: "Jakarta Pusat",
-                      statusColor: Color(0xff22C55E),
-                    ),
-
-                    SizedBox(height: 30),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -210,6 +217,7 @@ class FoodDonationCard extends StatelessWidget {
   final String timeLeft;
   final String location;
   final Color statusColor;
+  final VoidCallback? onPress;
 
   const FoodDonationCard({
     super.key,
@@ -220,6 +228,7 @@ class FoodDonationCard extends StatelessWidget {
     required this.timeLeft,
     required this.location,
     required this.statusColor,
+    this.onPress,
   });
 
   @override
@@ -344,7 +353,7 @@ class FoodDonationCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(18),
                 ),
               ),
-              onPressed: () {},
+              onPressed: onPress,
               child: const Text(
                 "Ajukan Donasi",
                 style: TextStyle(

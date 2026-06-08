@@ -23,6 +23,11 @@ class _DonasiPageState extends State<DonasiPage> {
   final TextEditingController alamatController = TextEditingController();
   final TextEditingController catatanController = TextEditingController();
 
+  Position? currentPosition;
+  String lokasiText = "Ambil lokasi penjemputan";
+  double? latitude;
+  double? longitude;
+
   final _formKey = GlobalKey<FormState>();
 
   DateTime? selectedDate;
@@ -42,6 +47,49 @@ class _DonasiPageState extends State<DonasiPage> {
         dateController.text = "${picked.day}-${picked.month}-${picked.year}";
       });
     }
+  }
+
+  Future<void> getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    if (!serviceEnabled) {
+      Get.snackbar("Lokasi", "Aktifkan GPS terlebih dahulu");
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      Get.snackbar("Lokasi", "Izin lokasi ditolak permanen");
+      return;
+    }
+
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
+
+    Placemark place = placemarks.first;
+
+    setState(() {
+      currentPosition = position;
+
+      latitude = position.latitude;
+      longitude = position.longitude;
+
+      lokasiText = "${place.street}, ${place.subLocality}, ${place.locality}";
+    });
   }
 
   @override
@@ -65,62 +113,155 @@ class _DonasiPageState extends State<DonasiPage> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 25),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Detail Makanan",
-                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 25),
-                  ),
-                  Text(
-                    "Bantu kami mengatahui apa yang ingin Anda\nbagikan",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black.withOpacity(0.6),
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Form(
-                key: _formKey,
-                child: Column(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    custom_form_without_labeltext(
-                      title: "Nama Makanan",
-                      subtitle: "Masukan nama lengkap sesuai KTP",
+                    Text(
+                      "Detail Makanan",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 25,
+                      ),
                     ),
-                    SizedBox(height: 10),
-                    custom_form_without_labeltext(
-                      title: "Jumlah Porsi",
-                      subtitle: "0",
+                    Text(
+                      "Bantu kami mengatahui apa yang ingin Anda\nbagikan",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black.withOpacity(0.6),
+                        fontSize: 15,
+                      ),
                     ),
-                    SizedBox(height: 10),
-                    DateField(
-                      controller: dateController,
-                      onTap: () => pickDate(context),
-                    ),
-                    SizedBox(height: 10),
-                    CustomDropdown(
-                      title: "Kategori",
-                      value: selectedCategory,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedCategory = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 10),
-                    UploadFotoWidget(),
-                    SizedBox(height: 10),
                   ],
                 ),
-              ),
-            ],
+                SizedBox(height: 20),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      UploadFotoWidget(),
+                      SizedBox(height: 10),
+                      custom_form_without_labeltext(
+                        title: "Nama Makanan",
+                        subtitle: "Masukan nama lengkap sesuai KTP",
+                      ),
+                      SizedBox(height: 10),
+                      custom_form_without_labeltext(
+                        title: "Jumlah Porsi",
+                        subtitle: "0",
+                      ),
+                      SizedBox(height: 10),
+                      DateField(
+                        controller: dateController,
+                        onTap: () => pickDate(context),
+                      ),
+                      SizedBox(height: 10),
+                      CustomDropdown(
+                        title: "Kategori",
+                        value: selectedCategory,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedCategory = value;
+                          });
+                        },
+                      ),
+                      SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Lokasi Penjemputan",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.location_on,
+                                  color: Color(0xff0F52FF),
+                                ),
+
+                                const SizedBox(width: 10),
+
+                                Expanded(
+                                  child: Text(
+                                    lokasiText,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            SizedBox(
+                              width: double.infinity,
+
+                              child: ElevatedButton.icon(
+                                onPressed: getCurrentLocation,
+
+                                icon: const Icon(
+                                  Icons.my_location,
+                                  color: const Color(0xff0F52FF),
+                                ),
+
+                                label: const Text(
+                                  "Gunakan Lokasi Saat Ini",
+                                  style: TextStyle(
+                                    color: const Color(0xff0F52FF),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      TextButton(
+                        onPressed: () {
+                          Get.snackbar("message", "Donasi success");
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(
+                            const Color(0xff0F52FF),
+                          ),
+                          foregroundColor: WidgetStatePropertyAll(
+                            const Color(0xff0F52FF),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            "Donasi",
+                            style: TextTheme.of(context).headlineSmall!
+                                .copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

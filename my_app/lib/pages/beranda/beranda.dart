@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/controllers/beranda_controller..dart';
+import 'package:my_app/pages/beranda/jadwal_jemput.dart';
+import 'package:my_app/pages/beranda/riwayat.dart';
 import 'package:my_app/pages/donasi/donasi.dart';
 
 class Beranda extends StatefulWidget {
@@ -21,10 +23,13 @@ class _BerandaState extends State<Beranda> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
-        leading: Icon(Icons.fastfood, size: 20, color: Colors.blue),
+        leading: Icon(Icons.fastfood, size: 20, color: const Color(0xff0F52FF)),
         title: Text(
           "FoodShare",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: const Color(0xff0F52FF),
+          ),
         ),
         actions: [
           IconButton(
@@ -98,10 +103,12 @@ class _BerandaState extends State<Beranda> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     customFiturContainer(
+                      ontap: () => Get.to(() => JadwalJemputPage()),
                       title: "Jadwal Jemput",
                       icon: Icons.calendar_month_outlined,
                     ),
                     customFiturContainer(
+                      ontap: () => Get.to(() => RiwayatPage()),
                       title: "Riwayat",
                       color: Colors.green,
                       icon: Icons.av_timer,
@@ -262,35 +269,40 @@ class customFiturContainer extends StatelessWidget {
     required this.title,
     this.color,
     required this.icon,
+    this.ontap,
   });
   final String title;
   final Color? color;
   final IconData icon;
+  final VoidCallback? ontap;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(15),
-      width: MediaQuery.of(context).size.width * 0.43,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            offset: Offset(0, 2),
-            blurRadius: 20,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          customContainerIcon(
-            icon: icon,
-            color: color ?? Colors.orange,
-            title: title,
-          ),
-        ],
+    return GestureDetector(
+      onTap: ontap,
+      child: Container(
+        padding: EdgeInsets.all(15),
+        width: MediaQuery.of(context).size.width * 0.43,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              offset: Offset(0, 2),
+              blurRadius: 20,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            customContainerIcon(
+              icon: icon,
+              color: color ?? Colors.orange,
+              title: title,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -341,7 +353,7 @@ class addDonation extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.blue,
+          color: const Color(0xff0F52FF),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
