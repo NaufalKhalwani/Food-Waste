@@ -17,9 +17,6 @@ class Profile extends StatelessWidget {
         padding: EdgeInsets.only(bottom: 100),
         child: Column(
           children: [
-            // =========================================
-            // HEADER
-            // =========================================
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(
@@ -45,7 +42,7 @@ class Profile extends StatelessWidget {
 
                   // PROFILE IMAGE
                   Container(
-                    padding: const EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 3),
