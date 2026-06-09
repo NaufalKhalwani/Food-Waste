@@ -6,6 +6,7 @@ class HelpCenterPage extends StatelessWidget {
   Widget buildHelp({
     required String question,
     required String answer,
+    void Function()? onTap,
   }) {
     return ExpansionTile(
       title: Text(question),
