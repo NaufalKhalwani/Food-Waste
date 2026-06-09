@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/controllers/beranda_controller..dart';
+import 'package:my_app/pages/beranda/jadwal_jemput.dart';
+import 'package:my_app/pages/beranda/riwayat.dart';
 import 'package:my_app/pages/donasi/donasi.dart';
+import 'package:my_app/controllers/food_controller.dart';
 
 class Beranda extends StatefulWidget {
   const Beranda({super.key});
@@ -12,17 +15,44 @@ class Beranda extends StatefulWidget {
 
 class _BerandaState extends State<Beranda> {
   bool isNotif = true;
+
+  String formatSisaHari(String? dateStr) {
+    if (dateStr == null) return "Sisa 1 hari";
+    try {
+      final expiry = DateTime.parse(dateStr);
+      final diff = expiry.difference(DateTime.now());
+      if (diff.inDays > 0) {
+        return "Sisa ${diff.inDays} hari";
+      } else if (diff.inHours > 0) {
+        return "Sisa ${diff.inHours} jam";
+      } else if (diff.inMinutes > 0) {
+        return "Sisa ${diff.inMinutes} menit";
+      } else {
+        return "Kadaluarsa";
+      }
+    } catch (_) {
+      return "Sisa 1 hari";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(BerandaController());
+    final foodController = FoodController.instance;
+    foodController.fetchMakanans();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
-        leading: Icon(Icons.fastfood, size: 20, color: Colors.blue),
+        leading: Icon(Icons.fastfood, size: 20, color: const Color(0xff0F52FF)),
         title: Text(
           "FoodShare",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: const Color(0xff0F52FF),
+          ),
         ),
         actions: [
           IconButton(
@@ -54,6 +84,7 @@ class _BerandaState extends State<Beranda> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: 40),
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
             child: Column(
@@ -65,7 +96,7 @@ class _BerandaState extends State<Beranda> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        controller.getGreeting() + ", Cia!",
+                        controller.getGreeting() + "!",
                         style: TextTheme.of(
                           context,
                         ).headlineLarge!.copyWith(fontWeight: FontWeight.bold),
@@ -95,14 +126,195 @@ class _BerandaState extends State<Beranda> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     customFiturContainer(
+                      ontap: () => Get.to(() => JadwalJemputPage()),
                       title: "Jadwal Jemput",
                       icon: Icons.calendar_month_outlined,
                     ),
                     customFiturContainer(
+                      ontap: () => Get.to(() => RiwayatPage()),
                       title: "Riwayat",
                       color: Colors.green,
                       icon: Icons.av_timer,
                     ),
+                  ],
+                ),
+                SizedBox(height: 20),
+
+                ///
+                ///Fingturs Demand
+                ///
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Donasi Terdekat",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 23,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "Lihat Semua",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_forward_ios_outlined,
+                              color: Colors.blue,
+                              size: 16,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Obx(() {
+                      if (foodController.isLoading.value) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 30),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      if (foodController.makanans.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 30),
+                          child: Center(
+                            child: Text(
+                              "Belum ada donasi makanan terdekat.",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return GridView.builder(
+                        itemCount: foodController.makanans.length,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2, // 2 kolom
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 25,
+                              childAspectRatio:
+                                  0.9, // rasio kotak (lebar/tinggi)
+                            ),
+                        itemBuilder: (context, index) {
+                          final item = foodController.makanans[index];
+                          final nama = item['nama_makanan'] ?? 'Makanan';
+                          final sisa = formatSisaHari(
+                            item['tanggal_kadaluarsa'],
+                          );
+                          final jumlah = "${item['jumlah'] ?? 0} Porsi";
+
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  offset: const Offset(0, 8),
+                                  blurRadius: 20,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(15),
+                                      ),
+                                      child: Image.network(
+                                        "https://picsum.photos/200/300?random=$index",
+                                        height: 120,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        nama,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 22,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.watch_later_outlined,
+                                                size: 15,
+                                                color: Colors.blue,
+                                              ),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                sisa,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                  color: Colors.blue,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.all(3),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue,
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                            ),
+                                            child: const Icon(
+                                              Icons.location_on_outlined,
+                                              size: 15,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        jumlah,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    }),
                   ],
                 ),
               ],
@@ -120,35 +332,40 @@ class customFiturContainer extends StatelessWidget {
     required this.title,
     this.color,
     required this.icon,
+    this.ontap,
   });
   final String title;
   final Color? color;
   final IconData icon;
+  final VoidCallback? ontap;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(15),
-      width: MediaQuery.of(context).size.width * 0.43,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            offset: Offset(0, 2),
-            blurRadius: 20,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          customContainerIcon(
-            icon: icon,
-            color: color ?? Colors.orange,
-            title: title,
-          ),
-        ],
+    return GestureDetector(
+      onTap: ontap,
+      child: Container(
+        padding: EdgeInsets.all(15),
+        width: MediaQuery.of(context).size.width * 0.43,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              offset: Offset(0, 2),
+              blurRadius: 20,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            customContainerIcon(
+              icon: icon,
+              color: color ?? Colors.orange,
+              title: title,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -170,13 +387,14 @@ class customContainerIcon extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.all(5),
+          padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(100),
-            color: Colors.blue.withOpacity(0.2),
+            color: Colors.blue.withOpacity(0.1),
           ),
           child: Icon(icon, color: color ?? Colors.blue, size: 40),
         ),
+        SizedBox(height: 5),
         Text(
           title,
           style: TextTheme.of(
@@ -198,7 +416,7 @@ class addDonation extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.blue,
+          color: const Color(0xff0F52FF),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(

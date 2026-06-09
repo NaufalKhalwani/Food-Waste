@@ -34,8 +34,7 @@ func Connect() {
 var migrateTargets = []interface{}{
 	&model.Pendonor{},
 	&model.Penerima{},
-	&model.RegisterAdmin{},
-	&model.LoginAdmin{},
+	&model.Admin{},
 	&model.Penyimpanan{},
 	&model.Makanan{},
 	&model.Request{},
@@ -47,4 +46,8 @@ func Migrate() {
 		log.Fatalf("Gagal melakukan migrasi database: %v", err)
 	}
 	log.Println("Migrasi database berhasil")
+}
+
+func Seed() {
+	log.Println()
 }

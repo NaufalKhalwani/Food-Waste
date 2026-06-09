@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/controllers/auth_controller.dart';
 import 'package:my_app/navigation_menu.dart';
 import 'package:my_app/pages/beranda/beranda.dart';
 import 'package:my_app/pages/register/widgets/custom_sign.dart';
@@ -33,6 +34,7 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    final authController = AuthController.instance;
     return Scaffold(
       backgroundColor: const Color.fromARGB(238, 255, 255, 255),
       appBar: null,
@@ -125,9 +127,18 @@ class _LoginState extends State<Login> {
                             ],
                           ),
                           SizedBox(height: 20),
-                          custom_button_elevated(
-                            title: "Login",
-                            onTap: () => Get.to(NavigationMenu()),
+                          Obx(
+                            () => authController.isLoading.value
+                                ? const Center(child: CircularProgressIndicator())
+                                : custom_button_elevated(
+                                    title: "Login",
+                                    onTap: () {
+                                      authController.login(
+                                        email: emailController.text.trim(),
+                                        password: passwordController.text.trim(),
+                                      );
+                                    },
+                                  ),
                           ),
                           SizedBox(height: 20),
                           or(

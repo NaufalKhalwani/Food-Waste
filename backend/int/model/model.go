@@ -24,55 +24,56 @@ type Pendonor struct {
 	IDDonor        string `gorm:"primaryKey;type:varchar(255);column:id_donor" json:"id_donor"`
 	NamaPendonor   string `gorm:"type:varchar(255);column:nama_pendonor" json:"nama_pendonor"`
 	EmailPendonor  string `gorm:"type:varchar(255);column:email_pendonor" json:"email_pendonor"`
+	Password       string `gorm:"type:varchar(255);column:password" json:"password"`
 	AlamatPendonor string `gorm:"type:varchar(255);column:alamat_pendonor" json:"alamat_pendonor"`
+	Role           string `gorm:"type:varchar(50);column:role" json:"role"`
 }
 
 func (Pendonor) TableName() string { return "pendonor" }
 
 func (p *Pendonor) BeforeCreate(tx *gorm.DB) (err error) {
 	p.IDDonor = fmt.Sprintf("DNR-%d", time.Now().Unix())
+	if p.Role == "" {
+		p.Role = "pendonor"
+	}
 	return
 }
 
 type Penerima struct {
 	IDPenerima    string `gorm:"primaryKey;type:varchar(255);column:id_penerima" json:"id_penerima"`
 	NamaPenerima  string `gorm:"type:varchar(255);column:nama_penerima" json:"nama_penerima"`
-	EmailPenerima string `gorm:"type:varchar(255);column:email_penerima" json:"email_penerima"`
+	EmailPenerima string `gorm:"type:varchar(255);column:email_penerima" json:"email"`
+	Password      string `gorm:"type:varchar(255);column:password" json:"password"`
 	Alamat        string `gorm:"type:varchar(255);column:alamat" json:"alamat"`
 	NomorTelfon   string `gorm:"type:varchar(16);column:nomor_telfon" json:"nomor_telfon"`
+	Role          string `gorm:"type:varchar(50);column:role" json:"role"`
 }
 
 func (Penerima) TableName() string { return "penerima" }
 
 func (p *Penerima) BeforeCreate(tx *gorm.DB) (err error) {
 	p.IDPenerima = fmt.Sprintf("PRN-%d", time.Now().Unix())
+	if p.Role == "" {
+		p.Role = "penerima"
+	}
 	return
 }
 
-type LoginAdmin struct {
-	IDAdmin  string `gorm:"primaryKey;type:varchar(255);column:id_admin" json:"id_admin"`
-	Username string `gorm:"type:varchar(25);column:username" json:"username"`
-	Password string `gorm:"type:varchar(255);column:password" json:"password"`
+type Admin struct {
+	IDAdmin    string `gorm:"primaryKey;type:varchar(255);column:id_admin" json:"id_admin"`
+	NamaAdmin  string `gorm:"type:varchar(25);column:username" json:"NamaAdmin"`
+	EmailAdmin string `gorm:"type:varchar(255);column:email_admin" json:"email_admin"`
+	Password   string `gorm:"type:varchar(255);column:password" json:"password"`
+	Role       string `gorm:"type:varchar(50);column:role" json:"role"`
 }
 
-func (LoginAdmin) TableName() string { return "admin" }
+func (Admin) TableName() string { return "admin" }
 
-func (p *LoginAdmin) BeforeCreate(tx *gorm.DB) (err error) {
+func (p *Admin) BeforeCreate(tx *gorm.DB) (err error) {
 	p.IDAdmin = fmt.Sprintf("ADM-%d", time.Now().Unix())
-	return
-}
-
-type RegisterAdmin struct {
-	IDAdmin     string `gorm:"primaryKey;type:varchar(255);column:id_admin" json:"id_admin"`
-	NewUsername string `gorm:"type:varchar(25);column:new_username" json:"new_username"`
-	EmailAdmin  string `gorm:"type:varchar(255);column:email_admin" json:"email_admin"`
-	NewPassword string `gorm:"type:varchar(255);column:new_password" json:"new_password"`
-}
-
-func (RegisterAdmin) TableName() string { return "admin" }
-
-func (p *RegisterAdmin) BeforeCreate(tx *gorm.DB) (err error) {
-	p.IDAdmin = fmt.Sprintf("ADM-%d", time.Now().Unix())
+	if p.Role == "" {
+		p.Role = "admin"
+	}
 	return
 }
 
@@ -126,10 +127,13 @@ type Makanan struct {
 	MakananID         string        `gorm:"primaryKey;type:varchar(255);column:makanan_id" json:"makanan_id"`
 	PenyimpananID     string        `gorm:"type:varchar(255);column:penyimpanan_id" json:"penyimpanan_id"`
 	IDDonor           string        `gorm:"type:varchar(255);column:id_donor" json:"id_donor"`
+	NamaMakanan       string        `gorm:"type:varchar(255);column:nama_makanan" json:"nama_makanan"`
+	Kategori          string        `gorm:"type:varchar(50);column:kategori" json:"kategori"`
 	Jumlah            int           `gorm:"type:integer;column:jumlah" json:"jumlah"`
 	KondisiMakanan    string        `gorm:"type:varchar(20);column:kondisi_makanan" json:"kondisi_makanan"`
 	StatusMakanan     StatusMakanan `gorm:"type:varchar(20);column:status_makanan" json:"status_makanan"`
 	TanggalKadaluarsa time.Time     `gorm:"type:date;column:tanggal_kadaluarsa" json:"tanggal_kadaluarsa"`
+	FotoMakanan       []byte        `gorm:"type:bytea;column:foto_makanan" json:"foto_makanan"`
 }
 
 func (Makanan) TableName() string { return "makanan" }

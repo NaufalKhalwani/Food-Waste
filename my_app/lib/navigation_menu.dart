@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:my_app/pages/food_waste/food_waste_page.dart';
 import 'package:my_app/pages/beranda/beranda.dart';
+import 'package:my_app/pages/profile/profile.dart';
 
 class NavigationMenu extends StatelessWidget {
   NavigationMenu({super.key});
@@ -15,7 +17,7 @@ class NavigationMenu extends StatelessWidget {
       backgroundColor: Colors.transparent,
       bottomNavigationBar: Obx(
         () => Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 26),
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(100),
@@ -25,12 +27,11 @@ class NavigationMenu extends StatelessWidget {
                   color: Colors.black.withOpacity(0.15),
                   blurRadius: 20,
                   spreadRadius: 1,
-                  offset: const Offset(0, 8),
+                  offset: const Offset(0, -8),
                 ),
               ],
             ),
             child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(100)),
               child: NavigationBar(
                 height: 80,
                 elevation: 0,
@@ -60,26 +61,17 @@ class NavigationMenu extends StatelessWidget {
                   ),
                   NavigationDestination(
                     icon: Icon(
-                      Iconsax.shop,
+                      Icons.eco,
                       color: controller.selectedIndex.value == 1
                           ? Colors.blue
                           : Colors.grey,
                     ),
-                    label: "Store",
-                  ),
-                  NavigationDestination(
-                    icon: Icon(
-                      Iconsax.heart,
-                      color: controller.selectedIndex.value == 2
-                          ? Colors.blue
-                          : Colors.grey,
-                    ),
-                    label: "WishList",
+                    label: "Food Waste",
                   ),
                   NavigationDestination(
                     icon: Icon(
                       Iconsax.user,
-                      color: controller.selectedIndex.value == 3
+                      color: controller.selectedIndex.value == 2
                           ? Colors.blue
                           : Colors.grey,
                     ),
@@ -99,5 +91,5 @@ class NavigationMenu extends StatelessWidget {
 class NavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
 
-  final screens = [Beranda(), Container(), Container(), Container()];
+  final screens = [Beranda(), FoodWastePage(), Profile()];
 }

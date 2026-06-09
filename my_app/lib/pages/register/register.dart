@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/controllers/auth_controller.dart';
 import 'package:my_app/pages/beranda/beranda.dart';
 import 'package:my_app/pages/login/login.dart';
 import 'package:my_app/pages/register/widgets/custom_forms.dart';
@@ -42,6 +43,7 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
+    final authController = AuthController.instance;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: null,
@@ -167,13 +169,35 @@ class _RegisterState extends State<Register> {
                     ),
                   ),
 
-                  SizedBox(height: 20),
-
-                  SizedBox(height: 15),
-
-                  custom_button_elevated(
-                    title: "Buat Akun",
-                    onTap: () => Get.to(Login()),
+                  Obx(
+                    () => authController.isLoading.value
+                        ? const Center(child: CircularProgressIndicator())
+                        : custom_button_elevated(
+                            title: "Buat Akun",
+                            onTap: () async {
+                              if (!_formKey.currentState!.validate()) {
+                                return;
+                              }
+                              if (!isCheck) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Harus menyetujui syarat & ketentuan",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+                              final success = await authController.register(
+                                name: usernameController.text.trim(),
+                                email: emailController.text.trim(),
+                                password: passwordController.text.trim(),
+                              );
+                              if (success) {
+                                Get.to(() => const Login());
+                              }
+                            },
+                          ),
                   ),
 
                   SizedBox(height: 15),
@@ -187,6 +211,7 @@ class _RegisterState extends State<Register> {
                   SizedBox(height: 20),
 
                   custom_sign_text(
+                    onTap: () => Get.offAll(() => Login()),
                     title: "Sudah punya akun? ",
                     subtitle: "Login",
                   ),
