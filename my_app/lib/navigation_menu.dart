@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:my_app/pages/food_waste/food_waste_page.dart';
 import 'package:my_app/pages/beranda/beranda.dart';
+import 'package:my_app/pages/admin/admin_dashboard.dart';
 import 'package:my_app/pages/profile/profile.dart';
 
 class NavigationMenu extends StatelessWidget {
@@ -15,6 +16,13 @@ class NavigationMenu extends StatelessWidget {
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.to(()=> AdminDashboardPage());
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.admin_panel_settings, color: Colors.white),
+      ),
       bottomNavigationBar: Obx(
         () => Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),

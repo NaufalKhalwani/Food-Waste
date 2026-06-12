@@ -29,18 +29,21 @@ class HelpCenterPage extends StatelessWidget {
       body: ListView(
         children: [
           buildHelp(
+            onTap: () {},
             question: "Bagaimana cara donasi?",
             answer:
                 "Pilih menu donasi lalu isi data makanan yang ingin didonasikan.",
           ),
 
           buildHelp(
+            onTap: () {},
             question: "Bagaimana makanan dikirim?",
             answer:
                 "Kurir atau relawan akan mengambil makanan ke lokasi.",
           ),
 
           buildHelp(
+            onTap: () {},
             question: "Apakah donasi gratis?",
             answer:
                 "Ya, seluruh proses donasi tidak dipungut biaya.",
