@@ -1,34 +1,17 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:my_app/controllers/auth_controller.dart';
+import 'package:my_app/controllers/beranda_controller.dart';
 import 'package:my_app/pages/food_waste/donation_status_page.dart';
-import 'package:my_app/controllers/food_controller.dart';
 
 class FoodWastePage extends StatelessWidget {
   const FoodWastePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final foodController = FoodController.instance;
-
-    String formatSisaHari(String? dateStr) {
-      if (dateStr == null) return "Sisa 1 hari";
-      try {
-        final expiry = DateTime.parse(dateStr);
-        final diff = expiry.difference(DateTime.now());
-        if (diff.inDays > 0) {
-          return "Sisa ${diff.inDays} hari";
-        } else if (diff.inHours > 0) {
-          return "Sisa ${diff.inHours} jam";
-        } else if (diff.inMinutes > 0) {
-          return "Sisa ${diff.inMinutes} menit";
-        } else {
-          return "Kadaluarsa";
-        }
-      } catch (_) {
-        return "Sisa 1 hari";
-      }
-    }
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Color(0xff0F52FF),
@@ -142,49 +125,138 @@ class FoodWastePage extends StatelessWidget {
                 // =====================================
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Obx(
-                    () {
-                      if (foodController.isLoading.value) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 30),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                      if (foodController.makanans.isEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 30),
-                          child: Center(
-                            child: Text(
-                              "Belum ada makanan layak konsumsi yang didonasikan.",
-                              style: TextStyle(color: Colors.grey, fontSize: 16),
-                            ),
-                          ),
-                        );
-                      }
-                      return Column(
-                        children: foodController.makanans.map((item) {
-                          final int index = foodController.makanans.indexOf(item);
-                          final name = item['nama_makanan'] ?? 'Makanan';
-                          final sisa = formatSisaHari(item['tanggal_kadaluarsa']);
-                          final jumlah = "${item['jumlah'] ?? 0} Porsi";
-                          final lokasi = item['penyimpanan_id'] ?? 'Lokasi';
+                  child: Obx(() {
+                    final berandaController = Get.find<BerandaController>();
+                    
+                    final List<dynamic> list = berandaController.foods.isEmpty
+                        ? [
+                            {
+                              'makanan_id': 'dummy-1',
+                              'nama_makanan': 'Nasi Box Ayam Teriyaki',
+                              'jumlah': 20,
+                              'kategori': 'Nasi',
+                              'tanggal_kadaluarsa': DateTime.now().add(const Duration(hours: 2)).toIso8601String(),
+                              'id_donor': 'The Garden Bistro',
+                            },
+                            {
+                              'makanan_id': 'dummy-2',
+                              'nama_makanan': 'Roti & Pastry',
+                              'jumlah': 15,
+                              'kategori': 'Roti',
+                              'tanggal_kadaluarsa': DateTime.now().add(const Duration(hours: 1)).toIso8601String(),
+                              'id_donor': 'Cafe Bread House',
+                            },
+                            {
+                              'makanan_id': 'dummy-3',
+                              'nama_makanan': 'Buffet Breakfast',
+                              'jumlah': 35,
+                              'kategori': 'Lainnya',
+                              'tanggal_kadaluarsa': DateTime.now().add(const Duration(hours: 3)).toIso8601String(),
+                              'id_donor': 'Hotel Grand Palace',
+                            },
+                          ]
+                        : berandaController.foods;
+
+                    return Column(
+                      children: [
+                        ...list.map((item) {
+                          final makananId = item['makanan_id'] ?? '';
+                          final foodName = item['nama_makanan'] ?? 'Makanan';
+                          final qty = item['jumlah'] ?? 0;
+                          final donor = item['id_donor'] ?? 'Donatur';
+                          final expiryDate = item['tanggal_kadaluarsa'] ?? '';
+                          
+                          String timeLeft = "2 Jam Lagi";
+                          if (expiryDate.isNotEmpty) {
+                            try {
+                              final expiry = DateTime.parse(expiryDate);
+                              final diff = expiry.difference(DateTime.now()).inHours;
+                              if (diff < 0) {
+                                timeLeft = "Kadaluarsa";
+                              } else if (diff == 0) {
+                                timeLeft = "Sisa <1 jam";
+                              } else {
+                                timeLeft = "$diff Jam Lagi";
+                              }
+                            } catch (_) {}
+                          }
 
                           return FoodDonationCard(
-                            onPress: () => Get.to(
-                              () => const DonationStatusPage(status: "approved"),
-                            ),
-                            donorName: "Food Share Donor",
-                            foodName: name,
-                            portion: jumlah,
-                            distance: "1.5 Km",
-                            timeLeft: sisa,
-                            location: lokasi,
+                            donorName: donor.startsWith('DNR-') ? "Donatur ($donor)" : donor,
+                            foodName: foodName,
+                            portion: "$qty Porsi",
+                            distance: "1.2 Km",
+                            timeLeft: timeLeft,
+                            location: "Jakarta",
                             statusColor: const Color(0xff22C55E),
+                            onPress: () async {
+                              final auth = AuthController.instance;
+                              if (auth.currentUser.value == null) {
+                                Get.snackbar(
+                                  "Error",
+                                  "Silakan login terlebih dahulu.",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                                return;
+                              }
+                              if (auth.currentUser.value!['sub_role'] != 'penerima') {
+                                Get.snackbar(
+                                  "Akses Ditolak",
+                                  "Hanya Penerima yang dapat mengajukan permintaan makanan.",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                                return;
+                              }
+
+                              // Show progress dialog
+                              Get.dialog(
+                                const Center(child: CircularProgressIndicator()),
+                                barrierDismissible: false,
+                              );
+
+                              try {
+                                final url = Uri.parse('${auth.baseUrl}/api/request');
+                                final body = {
+                                  'makanan_id': makananId,
+                                };
+
+                                final response = await http.post(
+                                  url,
+                                  headers: auth.headers,
+                                  body: jsonEncode(body),
+                                );
+
+                                Get.back(); // close dialog
+
+                                if (response.statusCode == 201 || response.statusCode == 200) {
+                                  Get.snackbar(
+                                    "Sukses",
+                                    "Pengajuan donasi berhasil dikirim!",
+                                    snackPosition: SnackPosition.BOTTOM,
+                                  );
+                                  Get.to(() => const DonationStatusPage(status: "approved"));
+                                } else {
+                                  Get.snackbar(
+                                    "Gagal",
+                                    "Gagal mengajukan donasi: ${response.body}",
+                                    snackPosition: SnackPosition.BOTTOM,
+                                  );
+                                }
+                              } catch (e) {
+                                Get.back(); // close dialog
+                                Get.snackbar(
+                                  "Error",
+                                  "Koneksi gagal: $e",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                              }
+                            },
                           );
                         }).toList(),
-                      );
-                    },
-                  ),
+                        const SizedBox(height: 30),
+                      ],
+                    );
+                  }),
                 ),
               ],
             ),

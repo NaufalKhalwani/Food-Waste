@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/controllers/auth_controller.dart';
+import 'package:my_app/pages/login/login.dart';
 import 'package:my_app/pages/profile/account_settings_page.dart';
 import 'package:my_app/pages/profile/donation_history_page.dart';
 import 'package:my_app/pages/profile/donation_received_page.dart';
@@ -11,15 +13,14 @@ class Profile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = AuthController.instance;
+
     return Scaffold(
       backgroundColor: const Color(0xffF4F5F7),
       body: SingleChildScrollView(
-        padding: EdgeInsets.only(bottom: 100),
+        padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           children: [
-            // =========================================
-            // HEADER
-            // =========================================
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(
@@ -39,74 +40,90 @@ class Profile extends StatelessWidget {
                   bottomRight: Radius.circular(45),
                 ),
               ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 28),
+              child: Obx(() {
+                final user = auth.currentUser.value;
+                final userName = user?['nama'] ?? 'User';
+                final subRole = user?['sub_role'] ?? 'user';
+                String roleLabel;
+                if (subRole == 'pendonor') {
+                  roleLabel = 'Food Donor Partner';
+                } else if (subRole == 'penerima') {
+                  roleLabel = 'Food Recipient';
+                } else if (subRole == 'admin') {
+                  roleLabel = 'Administrator';
+                } else {
+                  roleLabel = 'User';
+                }
 
-                  // PROFILE IMAGE
-                  Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
-                    ),
-                    child: const CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                        Icons.restaurant,
-                        size: 50,
-                        color: Color(0xff0F52FF),
+                return Column(
+                  children: [
+                    const SizedBox(height: 28),
+
+                    // PROFILE IMAGE
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
                       ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // NAME
-                  Text(
-                    "The Garden Bistro",
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Text(
-                    "Food Donor Partner",
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge!.copyWith(color: Colors.white70),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // STATS
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ProfileStatCard(
-                          icon: Icons.eco_outlined,
-                          value: "340 Kg",
-                          label: "Sisa Makanan\nDiselamatkan",
+                      child: CircleAvatar(
+                        radius: 48,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          subRole == 'admin' ? Icons.admin_panel_settings : Icons.restaurant,
+                          size: 50,
+                          color: const Color(0xff0F52FF),
                         ),
                       ),
+                    ),
 
-                      const SizedBox(width: 16),
+                    const SizedBox(height: 18),
 
-                      Expanded(
-                        child: ProfileStatCard(
-                          icon: Icons.favorite_outline,
-                          value: "128",
-                          label: "Donasi\nDiterima",
-                        ),
+                    // NAME
+                    Text(
+                      userName,
+                      style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Text(
+                      roleLabel,
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // STATS
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: ProfileStatCard(
+                            icon: Icons.eco_outlined,
+                            value: "340 Kg",
+                            label: "Sisa Makanan\nDiselamatkan",
+                          ),
+                        ),
+
+                        const SizedBox(width: 16),
+
+                        const Expanded(
+                          child: ProfileStatCard(
+                            icon: Icons.favorite_outline,
+                            value: "128",
+                            label: "Donasi\nDiterima",
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              }),
             ),
 
             const SizedBox(height: 24),
@@ -163,6 +180,27 @@ class Profile extends StatelessWidget {
                     subtitle: "Butuh bantuan? Hubungi kami atau lihat FAQ",
                     onTap: () {
                       Get.to(() => HelpCenterPage());
+                    },
+                  ),
+
+                  // LOGOUT BUTTON
+                  ProfileMenuItem(
+                    icon: Icons.logout,
+                    title: "Keluar",
+                    subtitle: "Keluar dari akun Anda",
+                    onTap: () {
+                      Get.defaultDialog(
+                        title: "Konfirmasi Logout",
+                        middleText: "Apakah Anda yakin ingin keluar?",
+                        textConfirm: "Ya, Keluar",
+                        textCancel: "Batal",
+                        confirmTextColor: Colors.white,
+                        buttonColor: Colors.red,
+                        onConfirm: () {
+                          auth.logout();
+                          Get.offAll(() => const Login());
+                        },
+                      );
                     },
                   ),
 

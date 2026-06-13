@@ -21,7 +21,7 @@ class FoodController extends GetxController {
 
     isLoading.value = true;
     try {
-      final response = await ApiService.getMakanans(_authController.token.value);
+      final response = await ApiService.getMakanans(_authController.token.value ?? '');
       if (response.statusCode == 200) {
         final List parsed = jsonDecode(response.body);
         makanans.assignAll(parsed);
@@ -51,7 +51,7 @@ class FoodController extends GetxController {
     isLoading.value = true;
     try {
       final response = await ApiService.createMakanan(
-        token: _authController.token.value,
+        token: _authController.token.value ?? '',
         namaMakanan: namaMakanan,
         kategori: kategori,
         jumlah: jumlah,

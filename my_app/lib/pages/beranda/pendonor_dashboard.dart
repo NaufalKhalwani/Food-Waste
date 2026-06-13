@@ -6,14 +6,14 @@ import 'package:my_app/pages/beranda/jadwal_jemput.dart';
 import 'package:my_app/pages/beranda/riwayat.dart';
 import 'package:my_app/pages/donasi/donasi.dart';
 
-class Beranda extends StatefulWidget {
-  const Beranda({super.key});
+class PendonorDashboard extends StatefulWidget {
+  const PendonorDashboard({super.key});
 
   @override
-  State<Beranda> createState() => _BerandaState();
+  State<PendonorDashboard> createState() => _PendonorDashboardState();
 }
 
-class _BerandaState extends State<Beranda> {
+class _PendonorDashboardState extends State<PendonorDashboard> {
   bool isNotif = true;
   @override
   Widget build(BuildContext context) {
@@ -80,13 +80,14 @@ class _BerandaState extends State<Beranda> {
                             : 'Cia';
                         return Text(
                           "${controller.getGreeting()}, $name!",
-                          style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontWeight: FontWeight.bold),
+                          style: Theme.of(context).textTheme.headlineLarge!
+                              .copyWith(fontWeight: FontWeight.bold),
                         );
                       }),
                       SizedBox(height: 5),
                       RichText(
                         text: TextSpan(
-                          text: "Dampak luar biasa Anda telah\nmenyelamatkan ",
+                          text: "Selamat datang wahai pendonor yang agung ",
                           style: TextStyle(
                             color: Colors.grey,
                             fontWeight: FontWeight.w500,
@@ -159,10 +160,30 @@ class _BerandaState extends State<Beranda> {
                     Obx(() {
                       final List<dynamic> list = controller.foods.isEmpty
                           ? [
-                              {'nama_makanan': 'Roti Bakery', 'tanggal_kadaluarsa': DateTime.now().add(const Duration(days: 2)).toIso8601String()},
-                              {'nama_makanan': 'Nasi Box', 'tanggal_kadaluarsa': DateTime.now().add(const Duration(days: 1)).toIso8601String()},
-                              {'nama_makanan': 'Buah Segar', 'tanggal_kadaluarsa': DateTime.now().add(const Duration(days: 3)).toIso8601String()},
-                              {'nama_makanan': 'Kue Basah', 'tanggal_kadaluarsa': DateTime.now().add(const Duration(days: 1)).toIso8601String()},
+                              {
+                                'nama_makanan': 'Roti Bakery',
+                                'tanggal_kadaluarsa': DateTime.now()
+                                    .add(const Duration(days: 2))
+                                    .toIso8601String(),
+                              },
+                              {
+                                'nama_makanan': 'Nasi Box',
+                                'tanggal_kadaluarsa': DateTime.now()
+                                    .add(const Duration(days: 1))
+                                    .toIso8601String(),
+                              },
+                              {
+                                'nama_makanan': 'Buah Segar',
+                                'tanggal_kadaluarsa': DateTime.now()
+                                    .add(const Duration(days: 3))
+                                    .toIso8601String(),
+                              },
+                              {
+                                'nama_makanan': 'Kue Basah',
+                                'tanggal_kadaluarsa': DateTime.now()
+                                    .add(const Duration(days: 1))
+                                    .toIso8601String(),
+                              },
                             ]
                           : controller.foods;
 
@@ -179,22 +200,27 @@ class _BerandaState extends State<Beranda> {
                         itemCount: list.length,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 25,
-                          childAspectRatio: 0.9,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 25,
+                              childAspectRatio: 0.9,
+                            ),
                         itemBuilder: (context, index) {
                           final item = list[index];
                           final name = item['nama_makanan'] ?? 'Makanan';
-                          final expiryDate = item['tanggal_kadaluarsa'] != null ? item['tanggal_kadaluarsa'].toString() : '';
-                          
+                          final expiryDate = item['tanggal_kadaluarsa'] != null
+                              ? item['tanggal_kadaluarsa'].toString()
+                              : '';
+
                           String daysLeftText = "Sisa 2 hari";
                           if (expiryDate.isNotEmpty) {
                             try {
                               final expiry = DateTime.parse(expiryDate);
-                              final diff = expiry.difference(DateTime.now()).inDays;
+                              final diff = expiry
+                                  .difference(DateTime.now())
+                                  .inDays;
                               if (diff < 0) {
                                 daysLeftText = "Kadaluarsa";
                               } else if (diff == 0) {
@@ -235,7 +261,8 @@ class _BerandaState extends State<Beranda> {
                                 Container(
                                   padding: const EdgeInsets.all(10),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         name,
@@ -273,9 +300,8 @@ class _BerandaState extends State<Beranda> {
                                             padding: const EdgeInsets.all(3),
                                             decoration: BoxDecoration(
                                               color: Colors.blue,
-                                              borderRadius: BorderRadius.circular(
-                                                100,
-                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
                                             ),
                                             child: const Icon(
                                               Icons.location_on_outlined,
@@ -376,7 +402,10 @@ class customContainerIcon extends StatelessWidget {
         SizedBox(height: 5),
         Text(
           title,
-          style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w700, fontSize: 20),
+          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+          ),
         ),
       ],
     );

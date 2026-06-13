@@ -27,10 +27,15 @@ class _RegisterState extends State<Register> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPassController = TextEditingController();
+  TextEditingController alamatController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
   bool isCheck = false;
+
+  String? selectedRole;
+
+  final List<String> roles = ['Pendonor', 'Penerima'];
 
   @override
   void dispose() {
@@ -38,12 +43,12 @@ class _RegisterState extends State<Register> {
     emailController.dispose();
     passwordController.dispose();
     confirmPassController.dispose();
+    alamatController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final authController = AuthController.instance;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: null,
@@ -73,6 +78,61 @@ class _RegisterState extends State<Register> {
                     key: _formKey,
                     child: Column(
                       children: [
+                        DropdownButtonFormField<String>(
+                          value: selectedRole,
+                          decoration: InputDecoration(
+                            floatingLabelStyle: const TextStyle(
+                              color: Colors.black,
+                            ),
+
+                            prefixIcon: const Icon(
+                              Icons.badge,
+                              color: Colors.blue,
+                            ),
+
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide(
+                                color: Colors.grey.withOpacity(0.4),
+                              ),
+                            ),
+
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide(
+                                color: Colors.grey.withOpacity(0.4),
+                                width: 2,
+                              ),
+                            ),
+
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: const BorderSide(color: Colors.red),
+                            ),
+
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+
+                          items: roles.map((role) {
+                            return DropdownMenuItem<String>(
+                              value: role,
+                              child: Text(role),
+                            );
+                          }).toList(),
+
+                          onChanged: (value) {
+                            setState(() {
+                              selectedRole = value;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 20),
                         CustomForm(
                           title: "Nama",
                           prefixIcon: Icons.person,
@@ -86,6 +146,14 @@ class _RegisterState extends State<Register> {
                           prefixIcon: Icons.email,
                           controller: emailController,
                           validator: AppValidator.email,
+                        ),
+                        SizedBox(height: 20),
+
+                        CustomForm(
+                          title: "Alamat",
+                          prefixIcon: Icons.location_on,
+                          controller: alamatController,
+                          validator: AppValidator.alamat,
                         ),
                         SizedBox(height: 20),
 
@@ -169,12 +237,25 @@ class _RegisterState extends State<Register> {
                     ),
                   ),
 
-                  Obx(
-                    () => authController.isLoading.value
+                  SizedBox(height: 20),
+
+                  SizedBox(height: 15),
+
+                  Obx(() {
+                    final authController = AuthController.instance;
+                    return authController.isLoading.value
                         ? const Center(child: CircularProgressIndicator())
                         : custom_button_elevated(
                             title: "Buat Akun",
                             onTap: () async {
+                              if (selectedRole == null) {
+                                Get.snackbar(
+                                  "Pilih Role",
+                                  "Silakan pilih role Pendonor atau Penerima.",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                                return;
+                              }
                               if (!_formKey.currentState!.validate()) {
                                 return;
                               }
@@ -188,19 +269,22 @@ class _RegisterState extends State<Register> {
                                 );
                                 return;
                               }
+
                               final success = await authController.register(
-                                name: usernameController.text.trim(),
-                                email: emailController.text.trim(),
-                                password: passwordController.text.trim(),
+                                nama: usernameController.text,
+                                email: emailController.text,
+                                password: passwordController.text,
+                                alamat: alamatController.text,
+                                role: selectedRole!,
                               );
+
                               if (success) {
-                                Get.to(() => const Login());
+                                Get.off(() => const Login());
                               }
                             },
-                          ),
-                  ),
-
-                  SizedBox(height: 15),
+                          );
+                  }),
+                  const SizedBox(height: 15),
 
                   or(),
 
@@ -210,10 +294,12 @@ class _RegisterState extends State<Register> {
 
                   SizedBox(height: 20),
 
-                  custom_sign_text(
-                    onTap: () => Get.offAll(() => Login()),
-                    title: "Sudah punya akun? ",
-                    subtitle: "Login",
+                  GestureDetector(
+                    onTap: () => Get.off(() => const Login()),
+                    child: const custom_sign_text(
+                      title: "Sudah punya akun? ",
+                      subtitle: "Login",
+                    ),
                   ),
                 ],
               ),
