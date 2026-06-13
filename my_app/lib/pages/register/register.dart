@@ -26,10 +26,15 @@ class _RegisterState extends State<Register> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPassController = TextEditingController();
+  TextEditingController alamatController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
   bool isCheck = false;
+
+  String? selectedRole;
+
+  final List<String> roles = ['Laki-laki', 'Perempuan'];
 
   @override
   void dispose() {
@@ -37,6 +42,7 @@ class _RegisterState extends State<Register> {
     emailController.dispose();
     passwordController.dispose();
     confirmPassController.dispose();
+    alamatController.dispose();
     super.dispose();
   }
 
@@ -71,6 +77,61 @@ class _RegisterState extends State<Register> {
                     key: _formKey,
                     child: Column(
                       children: [
+                        DropdownButtonFormField<String>(
+                          value: selectedRole,
+                          decoration: InputDecoration(
+                            floatingLabelStyle: const TextStyle(
+                              color: Colors.black,
+                            ),
+
+                            prefixIcon: const Icon(
+                              Icons.badge,
+                              color: Colors.blue,
+                            ),
+
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide(
+                                color: Colors.grey.withOpacity(0.4),
+                              ),
+                            ),
+
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide(
+                                color: Colors.grey.withOpacity(0.4),
+                                width: 2,
+                              ),
+                            ),
+
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: const BorderSide(color: Colors.red),
+                            ),
+
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+
+                          items: roles.map((role) {
+                            return DropdownMenuItem<String>(
+                              value: role,
+                              child: Text(role),
+                            );
+                          }).toList(),
+
+                          onChanged: (value) {
+                            setState(() {
+                              selectedRole = value;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 20),
                         CustomForm(
                           title: "Nama",
                           prefixIcon: Icons.person,
@@ -83,6 +144,14 @@ class _RegisterState extends State<Register> {
                           title: "Email",
                           prefixIcon: Icons.email,
                           controller: emailController,
+                          validator: AppValidator.email,
+                        ),
+                        SizedBox(height: 20),
+
+                        CustomForm(
+                          title: "Alamat",
+                          prefixIcon: Icons.location_on,
+                          controller: alamatController,
                           validator: AppValidator.email,
                         ),
                         SizedBox(height: 20),
