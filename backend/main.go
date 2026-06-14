@@ -1,17 +1,12 @@
 package main
 
-import (
-	"log"
+import "log" //mencatat log error
+import "anti-food-waste2.0/int/config" //import package config
+import "anti-food-waste2.0/int/db" // import package database
+import "anti-food-waste2.0/int/handlers" // import package handlers
+import "github.com/gin-gonic/gin" //import framework  Gin
 
-	"anti-food-waste2.0/int/config"
-	"anti-food-waste2.0/int/db"
-	"anti-food-waste2.0/int/handlers"
-	"github.com/gin-gonic/gin"
-) //mencatat log error
-//import package config
-// import package database
-// import package handlers
-//import framework  Gin
+
 
 func main() {
 	//runtime config
