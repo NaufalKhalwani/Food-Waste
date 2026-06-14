@@ -1,10 +1,7 @@
 package handlers
 
-import (
-	"net/http" // Digunakan untuk mengirimkan standard response HTTP (seperti StatusOK)
-
-	"github.com/gin-gonic/gin" // Gin framework yang digunakan untuk membuat web server (routing)
-)
+import "net/http" // Digunakan untuk mengirimkan standard response HTTP (seperti StatusOK)
+import "github.com/gin-gonic/gin" // Gin framework yang digunakan untuk membuat web server (routing)
 
 func SetupRoutes(r *gin.Engine) {
 	r.GET("/health", func(c *gin.Context) {

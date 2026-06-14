@@ -1,13 +1,10 @@
 package handlers
 
-import (
-	"net/http"
-	"net/http/httptest"
-	"testing"
-
-	"anti-food-waste2.0/int/config"
-	"github.com/gin-gonic/gin"
-)
+import "net/http"
+import "net/http/httptest"
+import "testing"
+import "anti-food-waste2.0/int/config"
+import "github.com/gin-gonic/gin"
 
 func TestJWTAuthMiddleware(t *testing.T) {
 	// Setup gin in test mode
