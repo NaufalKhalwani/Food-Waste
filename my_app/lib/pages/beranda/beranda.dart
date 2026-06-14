@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:my_app/controllers/beranda_controller..dart';
+import 'package:my_app/controllers/auth_controller.dart';
+import 'package:my_app/controllers/beranda_controller.dart';
 import 'package:my_app/pages/beranda/jadwal_jemput.dart';
 import 'package:my_app/pages/beranda/riwayat.dart';
 import 'package:my_app/pages/donasi/donasi.dart';
@@ -72,12 +73,16 @@ class _BerandaState extends State<Beranda> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        controller.getGreeting() + ", Cia!",
-                        style: TextTheme.of(
-                          context,
-                        ).headlineLarge!.copyWith(fontWeight: FontWeight.bold),
-                      ),
+                      Obx(() {
+                        final auth = AuthController.instance;
+                        final name = auth.currentUser.value != null
+                            ? (auth.currentUser.value!['nama'] ?? 'User')
+                            : 'Cia';
+                        return Text(
+                          "${controller.getGreeting()}, $name!",
+                          style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontWeight: FontWeight.bold),
+                        );
+                      }),
                       SizedBox(height: 5),
                       RichText(
                         text: TextSpan(
@@ -252,6 +257,144 @@ class _BerandaState extends State<Beranda> {
                         );
                       },
                     ),
+                    Obx(() {
+                      final List<dynamic> list = controller.foods.isEmpty
+                          ? [
+                              {'nama_makanan': 'Roti Bakery', 'tanggal_kadaluarsa': DateTime.now().add(const Duration(days: 2)).toIso8601String()},
+                              {'nama_makanan': 'Nasi Box', 'tanggal_kadaluarsa': DateTime.now().add(const Duration(days: 1)).toIso8601String()},
+                              {'nama_makanan': 'Buah Segar', 'tanggal_kadaluarsa': DateTime.now().add(const Duration(days: 3)).toIso8601String()},
+                              {'nama_makanan': 'Kue Basah', 'tanggal_kadaluarsa': DateTime.now().add(const Duration(days: 1)).toIso8601String()},
+                            ]
+                          : controller.foods;
+
+                      if (controller.isLoadingFoods.value) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      return GridView.builder(
+                        itemCount: list.length,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 25,
+                          childAspectRatio: 0.9,
+                        ),
+                        itemBuilder: (context, index) {
+                          final item = list[index];
+                          final name = item['nama_makanan'] ?? 'Makanan';
+                          final expiryDate = item['tanggal_kadaluarsa'] != null ? item['tanggal_kadaluarsa'].toString() : '';
+                          
+                          String daysLeftText = "Sisa 2 hari";
+                          if (expiryDate.isNotEmpty) {
+                            try {
+                              final expiry = DateTime.parse(expiryDate);
+                              final diff = expiry.difference(DateTime.now()).inDays;
+                              if (diff < 0) {
+                                daysLeftText = "Kadaluarsa";
+                              } else if (diff == 0) {
+                                daysLeftText = "Sisa <1 hari";
+                              } else {
+                                daysLeftText = "Sisa $diff hari";
+                              }
+                            } catch (_) {}
+                          }
+
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  offset: const Offset(0, 8),
+                                  blurRadius: 20,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(15),
+                                  ),
+                                  child: Image.network(
+                                    "https://picsum.photos/200/300?random=${index + 10}",
+                                    height: 120,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.watch_later_outlined,
+                                                size: 15,
+                                                color: Colors.blue,
+                                              ),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                daysLeftText,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                  color: Colors.blue,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.all(3),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue,
+                                              borderRadius: BorderRadius.circular(
+                                                100,
+                                              ),
+                                            ),
+                                            child: const Icon(
+                                              Icons.location_on_outlined,
+                                              size: 15,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    }),
                   ],
                 ),
               ],
@@ -334,9 +477,7 @@ class customContainerIcon extends StatelessWidget {
         SizedBox(height: 5),
         Text(
           title,
-          style: TextTheme.of(
-            context,
-          ).bodyLarge!.copyWith(fontWeight: FontWeight.w700, fontSize: 20),
+          style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w700, fontSize: 20),
         ),
       ],
     );

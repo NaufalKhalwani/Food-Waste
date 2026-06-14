@@ -16,6 +16,7 @@ type Config struct {
 	DBPort     string
 	AppPort    string
 	AppEnv     string
+	JWTSecret  string
 }
 
 var AppConfig Config
@@ -32,6 +33,10 @@ func Load() {
 	port := os.Getenv("DB_PORT")
 	appPort := os.Getenv("APP_PORT")
 	appEnv := os.Getenv("APP_ENV")
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "supersecretkeyforantifoodwasteapp2026"
+	}
 	AppConfig = Config{
 		DBHost:     host,
 		DBUser:     user,
@@ -40,6 +45,7 @@ func Load() {
 		DBPort:     port,
 		AppPort:    appPort,
 		AppEnv:     appEnv,
+		JWTSecret:  jwtSecret,
 	}
 }
 

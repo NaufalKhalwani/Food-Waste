@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:my_app/controllers/auth_controller.dart';
 import 'package:my_app/pages/admin/active_donation.dart';
 import 'package:my_app/pages/admin/food_verification.dart';
 import 'package:my_app/pages/admin/models/dummy_data.dart';
@@ -14,29 +17,73 @@ class AdminDashboardPage extends StatefulWidget {
 }
 
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
-  final List<Map<String, dynamic>> pendingFoods = [
-    {
-      "name": "Roti Bakery",
-      "donatur": "Toko Roti Sejahtera",
-      "qty": "20 Paket",
-      "expired": "2 Hari Lagi",
-      "image": "https://picsum.photos/300?1",
-    },
-    {
-      "name": "Nasi Box",
-      "donatur": "Hotel Mawar",
-      "qty": "50 Box",
-      "expired": "1 Hari Lagi",
-      "image": "https://picsum.photos/300?2",
-    },
-    {
-      "name": "Buah Segar",
-      "donatur": "Supermarket Fresh",
-      "qty": "35 Kg",
-      "expired": "3 Hari Lagi",
-      "image": "https://picsum.photos/300?3",
-    },
-  ];
+  List<Map<String, dynamic>> pendingFoods = [];
+  bool isLoading = true;
+  int totalMakanan = 0;
+  int totalRequest = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    setState(() => isLoading = true);
+    final auth = AuthController.instance;
+    try {
+      // Fetch makanan list
+      final makananUrl = Uri.parse('${auth.baseUrl}/api/makanan');
+      final makananResponse = await http.get(makananUrl, headers: auth.headers);
+      if (makananResponse.statusCode == 200) {
+        final decoded = jsonDecode(makananResponse.body);
+        if (decoded is List) {
+          setState(() {
+            totalMakanan = decoded.length;
+            pendingFoods = decoded.map<Map<String, dynamic>>((item) {
+              final expiryStr = item['tanggal_kadaluarsa'] ?? '';
+              String expiredText = '-';
+              if (expiryStr.isNotEmpty) {
+                try {
+                  final expiry = DateTime.parse(expiryStr);
+                  final diff = expiry.difference(DateTime.now()).inDays;
+                  if (diff < 0) {
+                    expiredText = 'Kadaluarsa';
+                  } else if (diff == 0) {
+                    expiredText = 'Hari ini';
+                  } else {
+                    expiredText = '$diff Hari Lagi';
+                  }
+                } catch (_) {}
+              }
+              return {
+                'name': item['nama_makanan'] ?? 'Makanan',
+                'donatur': item['id_donor'] ?? 'Donatur',
+                'qty': '${item['jumlah'] ?? 0} Porsi',
+                'expired': expiredText,
+                'image': 'https://picsum.photos/300?${item['makanan_id'] ?? 1}',
+                'makanan_id': item['makanan_id'] ?? '',
+              };
+            }).toList();
+          });
+        }
+      }
+
+      // Fetch request count
+      final requestUrl = Uri.parse('${auth.baseUrl}/api/request');
+      final requestResponse = await http.get(requestUrl, headers: auth.headers);
+      if (requestResponse.statusCode == 200) {
+        final decoded = jsonDecode(requestResponse.body);
+        if (decoded is List) {
+          setState(() => totalRequest = decoded.length);
+        }
+      }
+    } catch (e) {
+      debugPrint('Admin fetch error: $e');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +94,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         backgroundColor: const Color(0xff0F52FF),
         onPressed: () {
           Get.snackbar("Refresh", "Data berhasil diperbarui");
+          _fetchData();
+          Get.snackbar("Refresh", "Data sedang diperbarui...");
         },
         icon: const Icon(Icons.refresh, color: Colors.white),
         label: const Text("Refresh", style: TextStyle(color: Colors.white)),
@@ -97,6 +146,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Widget _headerSection() {
+    final auth = AuthController.instance;
+    final adminName = auth.currentUser.value?['nama'] ?? 'Admin';
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -104,19 +155,19 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         color: const Color(0xff0F52FF),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Halo Admin 👋",
-            style: TextStyle(
+            "Halo $adminName 👋",
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 26,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 5),
-          Text(
+          const SizedBox(height: 5),
+          const Text(
             "Kelola donasi makanan dan penerima donasi",
             style: TextStyle(color: Colors.white70),
           ),
@@ -136,7 +187,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       children: [
         StatCard(
           title: "Menunggu\nVerifikasi",
-          value: "127",
+          value: "${pendingFoods.length}",
           icon: Icons.pending_actions,
           color: Colors.orange,
           onTap: () {
@@ -146,7 +197,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
         StatCard(
           title: "Dipublikasi",
-          value: "54",
+          value: "$totalMakanan",
           icon: Icons.public,
           color: Colors.green,
           onTap: () {
@@ -169,7 +220,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
         StatCard(
           title: "Penerima\nACC",
-          value: "73",
+          value: "$totalRequest",
           icon: Icons.people_alt,
           color: Colors.blue,
           onTap: () {
@@ -400,17 +451,30 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 }
 
-class HistoryPage {
-  const HistoryPage();
+
+class HistoryPage extends StatelessWidget {
+  const HistoryPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Riwayat'),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xff0F52FF),
+      ),
+      backgroundColor: Colors.grey[100],
+      body: const Center(
+        child: Text(
+          'Halaman Riwayat',
+          style: TextStyle(fontSize: 18, color: Colors.grey),
+        ),
+      ),
+    );
+  }
 }
 
 class StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
   const StatCard({
     super.key,
     required this.title,
@@ -419,6 +483,12 @@ class StatCard extends StatelessWidget {
     required this.color,
     required this.onTap,
   });
+
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

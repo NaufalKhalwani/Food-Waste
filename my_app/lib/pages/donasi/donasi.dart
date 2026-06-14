@@ -1,10 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:my_app/controllers/auth_controller.dart';
+import 'package:my_app/controllers/beranda_controller.dart';
 import 'package:my_app/widgets/container_lokasi.dart';
 import 'package:my_app/widgets/upload_foto_widget.dart';
 
@@ -148,12 +152,15 @@ class _DonasiPageState extends State<DonasiPage> {
                       SizedBox(height: 10),
                       custom_form_without_labeltext(
                         title: "Nama Makanan",
-                        subtitle: "Masukan nama lengkap sesuai KTP",
+                        subtitle: "Masukan nama makanan",
+                        controller: makananController,
                       ),
                       SizedBox(height: 10),
                       custom_form_without_labeltext(
                         title: "Jumlah Porsi",
                         subtitle: "0",
+                        controller: porsiController,
+                        keyboardType: TextInputType.number,
                       ),
                       SizedBox(height: 10),
                       DateField(
@@ -233,8 +240,118 @@ class _DonasiPageState extends State<DonasiPage> {
                       ),
                       SizedBox(height: 20),
                       TextButton(
-                        onPressed: () {
-                          Get.snackbar("message", "Donasi success");
+                          onPressed: () async {
+                          final auth = AuthController.instance;
+                          if (auth.currentUser.value == null) {
+                            Get.snackbar(
+                              "Error",
+                              "Silakan login terlebih dahulu.",
+                            );
+                            return;
+                          }
+                          if (auth.currentUser.value!['sub_role'] !=
+                              'pendonor') {
+                            Get.snackbar(
+                              "Akses Ditolak",
+                              "Hanya Pendonor yang dapat mendonasikan makanan.",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                            return;
+                          }
+
+                          if (makananController.text.trim().isEmpty) {
+                            Get.snackbar(
+                              "Gagal",
+                              "Nama makanan tidak boleh kosong.",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                            return;
+                          }
+
+                          final porsi = int.tryParse(porsiController.text);
+                          if (porsi == null || porsi <= 0) {
+                            Get.snackbar(
+                              "Gagal",
+                              "Jumlah porsi tidak valid.",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                            return;
+                          }
+
+                          if (selectedCategory == null) {
+                            Get.snackbar(
+                              "Gagal",
+                              "Pilih kategori makanan.",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                            return;
+                          }
+
+                          if (selectedDate == null) {
+                            Get.snackbar(
+                              "Gagal",
+                              "Pilih batas waktu konsumsi.",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                            return;
+                          }
+
+                          // Show loading spinner
+                          Get.dialog(
+                            const Center(child: CircularProgressIndicator()),
+                            barrierDismissible: false,
+                          );
+
+                          try {
+                            final url = Uri.parse(
+                              '${auth.baseUrl}/api/makanan',
+                            );
+                            final body = {
+                              'nama_makanan': makananController.text.trim(),
+                              'jumlah': porsi,
+                              'kategori': selectedCategory,
+                              'kondisi_makanan': 'Baik',
+                              'status_makanan': 'tersedia',
+                              'tanggal_kadaluarsa': selectedDate!
+                                  .toUtc()
+                                  .toIso8601String(),
+                            };
+
+                            final response = await http.post(
+                              url,
+                              headers: auth.headers,
+                              body: jsonEncode(body),
+                            );
+
+                            Get.back(); // close dialog
+
+                            if (response.statusCode == 201 ||
+                                response.statusCode == 200) {
+                              Get.snackbar(
+                                "Sukses",
+                                "Donasi makanan berhasil dibuat!",
+                                snackPosition: SnackPosition.BOTTOM,
+                              );
+                              // Refresh home page data
+                              if (Get.isRegistered<BerandaController>()) {
+                                BerandaController.instance.fetchFoods();
+                              }
+                              Get.back(); // return to previous screen
+                            } else {
+                              Get.snackbar(
+                                "Gagal",
+                                "Gagal membuat donasi: ${response.body}",
+                                snackPosition: SnackPosition.BOTTOM,
+                              );
+                            }
+                          } catch (e) {
+                            Get.back(); // close dialog
+                            Get.snackbar(
+                              "Error",
+                              "Tidak dapat menghubungi server: $e",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          }
                         },
                         style: ButtonStyle(
                           backgroundColor: WidgetStatePropertyAll(
@@ -248,15 +365,15 @@ class _DonasiPageState extends State<DonasiPage> {
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Text(
                             "Donasi",
-                            style: TextTheme.of(context).headlineSmall!
+                            style: Theme.of(context).textTheme.headlineSmall!
                                 .copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20,
                                 ),
-                          ),
-                        ),
-                      ),
+    ),
+  ),
+),
                     ],
                   ),
                 ),
@@ -288,9 +405,9 @@ class CustomDropdown extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextTheme.of(
+          style: Theme.of(
             context,
-          ).bodyLarge!.copyWith(fontWeight: FontWeight.w700),
+          ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w700),
         ),
         SizedBox(height: 10),
         DropdownButtonFormField<String>(
@@ -329,9 +446,9 @@ class DateField extends StatelessWidget {
       children: [
         Text(
           "Batas Waktu Konsumsi",
-          style: TextTheme.of(
+          style: Theme.of(
             context,
-          ).bodyLarge!.copyWith(fontWeight: FontWeight.w700),
+          ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w700),
         ),
         SizedBox(height: 10),
         TextFormField(
@@ -364,10 +481,14 @@ class custom_form_without_labeltext extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
+    this.controller,
+    this.keyboardType,
   });
 
   final String title;
   final String subtitle;
+  final TextEditingController? controller;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
@@ -376,14 +497,16 @@ class custom_form_without_labeltext extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextTheme.of(
+          style: Theme.of(
             context,
-          ).bodyLarge!.copyWith(fontWeight: FontWeight.w700),
+          ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w700),
         ),
         SizedBox(height: 10),
         TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
           decoration: InputDecoration(
-            hint: Text(subtitle),
+            hintText: subtitle,
 
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
