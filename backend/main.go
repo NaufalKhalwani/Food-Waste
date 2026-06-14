@@ -1,14 +1,17 @@
 package main
 
 import (
-	"log" //mencatat log error
+	"log"
 
-	"anti-food-waste2.0/int/config"   //import package config
-	"anti-food-waste2.0/int/db"       // import package database
-	"anti-food-waste2.0/int/handlers" // import package handlers
-
-	"github.com/gin-gonic/gin" //import framework  Gin
-)
+	"anti-food-waste2.0/int/config"
+	"anti-food-waste2.0/int/db"
+	"anti-food-waste2.0/int/handlers"
+	"github.com/gin-gonic/gin"
+) //mencatat log error
+//import package config
+// import package database
+// import package handlers
+//import framework  Gin
 
 func main() {
 	//runtime config
@@ -51,3 +54,5 @@ func main() {
 		log.Fatalf("Server gagal dijalankan: %v", err)
 	}
 }
+
+

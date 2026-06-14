@@ -1,10 +1,7 @@
 package handlers
 
-import (
-	"testing"
-
-	"anti-food-waste2.0/int/config"
-)
+import "testing"
+import "anti-food-waste2.0/int/config"
 
 func TestGenerateAndValidateJWT(t *testing.T) {
 	config.AppConfig.JWTSecret = "testsecretkeyforantifoodwasteapp"

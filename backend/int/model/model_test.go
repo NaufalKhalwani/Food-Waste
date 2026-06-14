@@ -1,109 +1,9 @@
-package test
+package model
 
-import (
-	"fmt"
-	"strings"
-	"testing"
-	"time"
-)
-
-// =========================================================
-// Salin definisi model agar test dapat berjalan tanpa DB
-// =========================================================
-
-type StatusMakanan string
-
-const (
-	StatusTersedia     StatusMakanan = "tersedia"
-	StatusDirequest    StatusMakanan = "direquest"
-	StatusDidistribusi StatusMakanan = "didistribusikan"
-	StatusKadaluarsa   StatusMakanan = "kadaluarsa"
-)
-
-var validTransitions = map[StatusMakanan][]StatusMakanan{
-	StatusTersedia:     {StatusDirequest, StatusKadaluarsa},
-	StatusDirequest:    {StatusDidistribusi, StatusTersedia},
-	StatusDidistribusi: {},
-	StatusKadaluarsa:   {},
-}
-
-func (s StatusMakanan) CanTransitionTo(next StatusMakanan) bool {
-	allowed, ok := validTransitions[s]
-	if !ok {
-		return false
-	}
-	for _, a := range allowed {
-		if a == next {
-			return true
-		}
-	}
-	return false
-}
-
-type StatusRequest string
-
-const (
-	StatusPending   StatusRequest = "pending"
-	StatusDisetujui StatusRequest = "disetujui"
-	StatusDitolak   StatusRequest = "ditolak"
-	StatusSelesai   StatusRequest = "selesai"
-)
-
-var validRequestTransitions = map[StatusRequest][]StatusRequest{
-	StatusPending:   {StatusDisetujui, StatusDitolak},
-	StatusDisetujui: {StatusSelesai},
-	StatusDitolak:   {},
-	StatusSelesai:   {},
-}
-
-func (s StatusRequest) CanTransitionTo(next StatusRequest) bool {
-	allowed, ok := validRequestTransitions[s]
-	if !ok {
-		return false
-	}
-	for _, a := range allowed {
-		if a == next {
-			return true
-		}
-	}
-	return false
-}
-
-// Model struct (tanpa GORM tags) untuk validasi logika
-type Pendonor struct {
-	IDDonor        string
-	NamaPendonor   string
-	EmailPendonor  string
-	Password       string
-	AlamatPendonor string
-}
-
-type Penerima struct {
-	IDPenerima    string
-	NamaPenerima  string
-	EmailPenerima string
-	Alamat        string
-	NomorTelfon   string
-}
-
-type Makanan struct {
-	MakananID         string
-	PenyimpananID     string
-	IDDonor           string
-	Jumlah            int
-	KondisiMakanan    string
-	StatusMakanan     StatusMakanan
-	TanggalKadaluarsa time.Time
-}
-
-type Request struct {
-	RequestID          string
-	IDAdmin            string
-	PenerimaIDPenerima string
-	MakananID          string
-	Status             StatusRequest
-	TanggalRequest     *time.Time
-}
+import "fmt"
+import "strings"
+import "testing"
+import "time"
 
 // =========================================================
 // Helper ID generator (mengikuti logika BeforeCreate)
@@ -136,6 +36,20 @@ func GenerateRequestID() string {
 // =========================================================
 // TEST: StatusMakanan - Finite State Machine (Automata)
 // =========================================================
+
+func TestMakananBeforeCreate(t *testing.T) {
+	m := Makanan{}
+
+	err := m.BeforeCreate(nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.HasPrefix(m.MakananID, "MKN-") {
+		t.Errorf("expected ID starts with MKN-, got %s", m.MakananID)
+	}
+}
 
 func TestStatusMakanan_ValidTransitions(t *testing.T) {
 	tests := []struct {
@@ -176,6 +90,23 @@ func TestStatusMakanan_InvalidStatusKey(t *testing.T) {
 }
 
 // =========================================================
+// TEST: Penyimpanan - BeforeCreate Hook
+// =========================================================
+func TestPenyimpananBeforeCreate(t *testing.T) {
+	p := Penyimpanan{}
+
+	err := p.BeforeCreate(nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.HasPrefix(p.PenyimpananID, "PSN-") {
+		t.Errorf("expected ID starts with PSN-, got %s", p.PenyimpananID)
+	}
+}
+
+// =========================================================
 // TEST: StatusRequest - Finite State Machine (Automata)
 // =========================================================
 
@@ -212,6 +143,20 @@ func TestStatusRequest_InvalidStatusKey(t *testing.T) {
 	var status StatusRequest = "status_aneh"
 	if status.CanTransitionTo(StatusPending) {
 		t.Error("Status tidak dikenal seharusnya return false")
+	}
+}
+
+func TestRequestBeforeCreate(t *testing.T) {
+	r := Request{}
+
+	err := r.BeforeCreate(nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.HasPrefix(r.RequestID, "RQT-") {
+		t.Errorf("expected ID starts with RQT-, got %s", r.RequestID)
 	}
 }
 
@@ -317,8 +262,65 @@ func TestMakanan_TanggalKadaluarsa(t *testing.T) {
 }
 
 // =========================================================
+// TEST: Struct Admin - Validasi Field
+// =========================================================
+
+func TestAdminBeforeCreate(t *testing.T) {
+	a := Admin{}
+
+	a.BeforeCreate(nil)
+
+	if !strings.HasPrefix(a.IDAdmin, "ADM-") {
+		t.Errorf("expected prefix ADM-, got %s", a.IDAdmin)
+	}
+
+	if a.Role != "admin" {
+		t.Errorf("expected role admin, got %s", a.Role)
+	}
+}
+
+// =========================================================
+// TEST: Struct Pendonor - Validasi Field
+// =========================================================
+func TestPendonorBeforeCreate(t *testing.T) {
+	p := Pendonor{}
+
+	err := p.BeforeCreate(nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.HasPrefix(p.IDDonor, "DNR-") {
+		t.Errorf("expected ID starts with DNR-, got %s", p.IDDonor)
+	}
+
+	if p.Role != "pendonor" {
+		t.Errorf("expected role pendonor, got %s", p.Role)
+	}
+}
+
+// =========================================================
 // TEST: Struct Penerima - Validasi Field
 // =========================================================
+
+func TestPenerimaBeforeCreate(t *testing.T) {
+	p := Penerima{}
+
+	err := p.BeforeCreate(nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.HasPrefix(p.IDPenerima, "PRN-") {
+		t.Errorf("expected ID starts with PRN-, got %s", p.IDPenerima)
+	}
+
+	if p.Role != "penerima" {
+		t.Errorf("expected role penerima, got %s", p.Role)
+	}
+}
 
 func TestPenerima_NomorTeleponLength(t *testing.T) {
 	tests := []struct {
