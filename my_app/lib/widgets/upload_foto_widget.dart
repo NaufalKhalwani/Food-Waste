@@ -80,9 +80,7 @@ class _UploadFotoWidgetState extends State<UploadFotoWidget> {
         children: [
           Text(
             "Foto Makanan",
-            style: TextTheme.of(
-              context,
-            ).bodyLarge!.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w700),
           ),
 
           SizedBox(height: 12),

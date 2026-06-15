@@ -14,33 +14,46 @@ func SetupRoutes(r *gin.Engine) {
 	// grouping endpoint API
 	api := r.Group("/api")
 
-	// implemnentasi API
-
 	// pendonor
-	api.POST("/pendonor", CreatePendonor)
-	api.GET("/pendonor", GetPendonor)
-	api.DELETE("/pendonor/:id_donor", DeletePendonor)
+	api.POST("/Register/pendonor", CreatePendonor)
+	api.POST("/Login/pendonor", LoginPendonor)
 
 	// penerima
-	api.POST("/penerima", CreatePenerima)
-	api.GET("/penerima", GetPenerimas)
-	api.DELETE("/penerima/:id_penerima", DeletePenerima)
+	api.POST("/Register/penerima", CreatePenerima)
+	api.POST("/Login/penerima", LoginPenerima)
 
 	// admin
-	api.POST("/register/admin", CreateAdmin)
-	api.GET("/login/admin", GetAdmins)
+	api.POST("/Register/admin", CreateAdmin)
+	api.POST("/Login/admin", LoginAdmin)
+
+	// pendonor management
+	api.GET("/pendonor", JWTAuthMiddleware("admin", "user"), GetPendonor)
+	api.DELETE("/pendonor/:id_donor", JWTAuthMiddleware("admin"), DeletePendonor)
+	api.PUT("/pendonor/:id_donor", JWTAuthMiddleware("admin", "pendonor"), UpdatePendonor)
+
+	// penerima management
+	api.GET("/penerima", JWTAuthMiddleware("admin"), GetPenerimas)
+	api.DELETE("/penerima/:id_penerima", JWTAuthMiddleware("admin"), DeletePenerima)
+	api.PUT("/penerima/:id_penerima", JWTAuthMiddleware("admin", "penerima"), UpdatePenerima)
+
+	// admin management
+	api.GET("/admin", JWTAuthMiddleware("admin"), GetAdmins)
 
 	// penyimpanan
-	api.POST("/penyimpanan", CreatePenyimpanan)
-	api.GET("/penyimpanan", GetPenyimpanans)
-	api.DELETE("/penyimpanan/:penyimpanan_id", DeletePenyimpanan)
+	api.POST("/penyimpanan", JWTAuthMiddleware("admin"), CreatePenyimpanan)
+	api.GET("/penyimpanan", JWTAuthMiddleware("admin", "user"), GetPenyimpanans)
+	api.DELETE("/penyimpanan/:penyimpanan_id", JWTAuthMiddleware("admin"), DeletePenyimpanan)
+	api.PUT("/penyimpanan/:penyimpanan_id", JWTAuthMiddleware("admin"), UpdatePenyimpanan)
 
 	// makanan
-	api.POST("/makanan", CreateMakanan)
-	api.GET("/makanan", GetMakanans)
-	api.DELETE("/makanan/:makanan_id", DeleteMakanan)
+	api.POST("/makanan", JWTAuthMiddleware("pendonor"), CreateMakanan)
+	api.GET("/makanan", JWTAuthMiddleware("admin", "user"), GetMakanans)
+	api.DELETE("/makanan/:makanan_id", JWTAuthMiddleware("admin", "pendonor"), DeleteMakanan)
+	api.PUT("/makanan/:makanan_id", JWTAuthMiddleware("admin", "pendonor"), UpdateMakanan)
+
 	// request
-	api.POST("/request", CreateRequest)
-	api.GET("/request", GetRequests)
-	api.DELETE("/request/:request_id", DeleteRequest)
+	api.POST("/request", JWTAuthMiddleware("penerima"), CreateRequest)
+	api.GET("/request", JWTAuthMiddleware("admin", "penerima"), GetRequests)
+	api.DELETE("/request/:request_id", JWTAuthMiddleware("admin", "penerima"), DeleteRequest)
+	api.PUT("/request/:request_id", JWTAuthMiddleware("admin", "penerima"), UpdateRequest)
 }

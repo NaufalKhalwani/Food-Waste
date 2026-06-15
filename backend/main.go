@@ -17,6 +17,7 @@ func main() {
 	//koneksi,migrasi db,code reuse/library
 	db.Connect()
 	db.Migrate()
+	db.Seed()
 
 	//setup gin,runtime config
 	if config.AppConfig.AppEnv == "production" {

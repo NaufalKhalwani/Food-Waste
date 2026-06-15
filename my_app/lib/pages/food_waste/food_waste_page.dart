@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:my_app/controllers/auth_controller.dart';
+import 'package:my_app/controllers/beranda_controller.dart';
 import 'package:my_app/pages/food_waste/donation_status_page.dart';
 
 class FoodWastePage extends StatelessWidget {
@@ -121,44 +128,154 @@ class FoodWastePage extends StatelessWidget {
                 // =====================================
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      FoodDonationCard(
-                        onPress: () => Get.to(
-                          () => DonationStatusPage(status: "approved"),
-                        ),
-                        donorName: "The Garden Bistro",
-                        foodName: "Nasi Box Ayam Teriyaki",
-                        portion: "20 Porsi",
-                        distance: "1.2 Km",
-                        timeLeft: "2 Jam Lagi",
-                        location: "Jakarta Selatan",
-                        statusColor: Color(0xff22C55E),
-                      ),
+child: Obx(() {
+  final berandaController = Get.find<BerandaController>();
 
-                      FoodDonationCard(
-                        donorName: "Cafe Bread House",
-                        foodName: "Roti & Pastry",
-                        portion: "15 Porsi",
-                        distance: "2.8 Km",
-                        timeLeft: "1 Jam Lagi",
-                        location: "Bandung",
-                        statusColor: Color(0xffF59E0B),
-                      ),
+  final List<dynamic> list = berandaController.foods.isEmpty
+      ? [
+          {
+            'makanan_id': 'dummy-1',
+            'nama_makanan': 'Nasi Box Ayam Teriyaki',
+            'jumlah': 20,
+            'kategori': 'Nasi',
+            'tanggal_kadaluarsa':
+                DateTime.now().add(const Duration(hours: 2)).toIso8601String(),
+            'id_donor': 'The Garden Bistro',
+          },
+          {
+            'makanan_id': 'dummy-2',
+            'nama_makanan': 'Roti & Pastry',
+            'jumlah': 15,
+            'kategori': 'Roti',
+            'tanggal_kadaluarsa':
+                DateTime.now().add(const Duration(hours: 1)).toIso8601String(),
+            'id_donor': 'Cafe Bread House',
+          },
+          {
+            'makanan_id': 'dummy-3',
+            'nama_makanan': 'Buffet Breakfast',
+            'jumlah': 35,
+            'kategori': 'Lainnya',
+            'tanggal_kadaluarsa':
+                DateTime.now().add(const Duration(hours: 3)).toIso8601String(),
+            'id_donor': 'Hotel Grand Palace',
+          },
+        ]
+      : berandaController.foods;
 
-                      FoodDonationCard(
-                        donorName: "Hotel Grand Palace",
-                        foodName: "Buffet Breakfast",
-                        portion: "35 Porsi",
-                        distance: "4.5 Km",
-                        timeLeft: "3 Jam Lagi",
-                        location: "Jakarta Pusat",
-                        statusColor: Color(0xff22C55E),
-                      ),
+  return Column(
+    children: [
+      ...list.map((item) {
+        final makananId = item['makanan_id'] ?? '';
+        final foodName = item['nama_makanan'] ?? 'Makanan';
+        final qty = item['jumlah'] ?? 0;
+        final donor = item['id_donor'] ?? 'Donatur';
+        final expiryDate = item['tanggal_kadaluarsa'] ?? '';
 
-                      SizedBox(height: 30),
-                    ],
+        String timeLeft = "2 Jam Lagi";
+
+        if (expiryDate.isNotEmpty) {
+          try {
+            final expiry = DateTime.parse(expiryDate);
+            final diff = expiry.difference(DateTime.now()).inHours;
+
+            if (diff < 0) {
+              timeLeft = "Kadaluarsa";
+            } else if (diff == 0) {
+              timeLeft = "Sisa <1 jam";
+            } else {
+              timeLeft = "$diff Jam Lagi";
+            }
+          } catch (_) {}
+        }
+
+        return FoodDonationCard(
+          donorName:
+              donor.startsWith('DNR-') ? "Donatur ($donor)" : donor,
+          foodName: foodName,
+          portion: "$qty Porsi",
+          distance: "1.2 Km",
+          timeLeft: timeLeft,
+          location: "Jakarta",
+          statusColor: const Color(0xff22C55E),
+          onPress: () async {
+            final auth = AuthController.instance;
+
+            if (auth.currentUser.value == null) {
+              Get.snackbar(
+                "Error",
+                "Silakan login terlebih dahulu.",
+                snackPosition: SnackPosition.BOTTOM,
+              );
+              return;
+            }
+
+            if (auth.currentUser.value!['sub_role'] != 'penerima') {
+              Get.snackbar(
+                "Akses Ditolak",
+                "Hanya Penerima yang dapat mengajukan permintaan makanan.",
+                snackPosition: SnackPosition.BOTTOM,
+              );
+              return;
+            }
+
+            Get.dialog(
+              const Center(
+                child: CircularProgressIndicator(),
+              ),
+              barrierDismissible: false,
+            );
+
+            try {
+              final url = Uri.parse('${auth.baseUrl}/api/request');
+
+              final response = await http.post(
+                url,
+                headers: auth.headers,
+                body: jsonEncode({
+                  'makanan_id': makananId,
+                }),
+              );
+
+              Get.back();
+
+              if (response.statusCode == 200 ||
+                  response.statusCode == 201) {
+                Get.snackbar(
+                  "Sukses",
+                  "Pengajuan donasi berhasil dikirim!",
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+
+                Get.to(
+                  () => const DonationStatusPage(
+                    status: "approved",
                   ),
+                );
+              } else {
+                Get.snackbar(
+                  "Gagal",
+                  "Gagal mengajukan donasi: ${response.body}",
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+            } catch (e) {
+              Get.back();
+
+              Get.snackbar(
+                "Error",
+                "Koneksi gagal: $e",
+                snackPosition: SnackPosition.BOTTOM,
+              );
+            }
+          },
+        );
+      }).toList(),
+
+      const SizedBox(height: 30),
+    ],
+  );
+}),
                 ),
               ],
             ),

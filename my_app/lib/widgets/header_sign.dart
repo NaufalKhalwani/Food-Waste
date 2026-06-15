@@ -34,9 +34,7 @@ class header_sign extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             title,
-            style: TextTheme.of(
-              context,
-            ).bodyLarge!.copyWith(fontSize: 30, fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 30, fontWeight: FontWeight.bold),
           ),
           Text(subtitle, textAlign: TextAlign.center),
         ],

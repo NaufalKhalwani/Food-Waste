@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/navigation_menu.dart';
-import 'package:my_app/pages/beranda/beranda.dart';
-import 'package:my_app/pages/donasi/donasi.dart';
-import 'package:my_app/pages/register/register.dart';
+import 'package:my_app/controllers/auth_controller.dart';
 import 'package:get/get.dart';
+import 'package:my_app/pages/login/login.dart';
+import 'package:my_app/Routes/routes.dart';
+import 'package:my_app/pages/register/register.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  Get.put(AuthController(), permanent: true);
   runApp(const MyApp());
 }
 
@@ -18,6 +20,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
       home: Register(),
+      initialRoute: AppRoutes.login,
+      getPages: AppRoutes.pages,
     );
   }
 }

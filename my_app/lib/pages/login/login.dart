@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/controllers/auth_controller.dart';
 import 'package:my_app/navigation_menu.dart';
-import 'package:my_app/pages/beranda/beranda.dart';
+import 'package:my_app/pages/register/register.dart';
 import 'package:my_app/pages/register/widgets/custom_sign.dart';
 import 'package:my_app/utils/validator.dart';
 import 'package:my_app/widgets/custom_button_elevated.dart';
 import 'package:my_app/widgets/custom_form.dart';
 import 'package:my_app/widgets/custom_or.dart';
 import 'package:my_app/widgets/custom_sign_text.dart';
-import 'package:my_app/widgets/header_sign.dart';
+import 'package:my_app/Routes/routes.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -124,12 +125,38 @@ class _LoginState extends State<Login> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 20),
-                          custom_button_elevated(
-                            title: "Login",
-                            onTap: () => Get.to(NavigationMenu()),
-                          ),
-                          SizedBox(height: 20),
+                          Obx(() {
+                            final authController = AuthController.instance;
+                            return authController.isLoading.value
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : custom_button_elevated(
+                                    title: "Login",
+                                    onTap: () async {
+                                      if (emailController.text.trim().isEmpty ||
+                                          passwordController.text
+                                              .trim()
+                                              .isEmpty) {
+                                        Get.snackbar(
+                                          "Input Kosong",
+                                          "Silakan isi email dan password.",
+                                          snackPosition: SnackPosition.BOTTOM,
+                                        );
+                                        return;
+                                      }
+                                      final success = await authController
+                                          .login(
+                                            emailController.text.trim(),
+                                            passwordController.text.trim(),
+                                          );
+                                      if (success) {
+                                        authController.redirectByRole();
+                                      }
+                                    },
+                                  );
+                          }),
+                          const SizedBox(height: 20),
                           or(
                             title:
                                 "--------------- Or Sign with --------------",
@@ -141,9 +168,12 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  custom_sign_text(
-                    title: "Belum punya akun?",
-                    subtitle: " Daftar",
+                  GestureDetector(
+                    onTap: () => Get.to(() => const Register()),
+                    child: const custom_sign_text(
+                      title: "Belum punya akun?",
+                      subtitle: " Daftar",
+                    ),
                   ),
                 ],
               ),

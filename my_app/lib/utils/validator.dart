@@ -19,6 +19,16 @@ class AppValidator {
     return null;
   }
 
+  static String? alamat(String? value) {
+    if (value == null || value.isEmpty) {
+      return "Alamat harus diisi";
+    }
+    if (value.length < 5) {
+      return "Alamat minimal 5 karakter";
+    }
+    return null;
+  }
+
   static String? password(String? value) {
     if (value == null || value.isEmpty) {
       return "Password harus diisi";
@@ -32,10 +42,7 @@ class AppValidator {
     return null;
   }
 
-  static String? confirmPassword(
-    String? value,
-    String password,
-  ) {
+  static String? confirmPassword(String? value, String password) {
     if (value == null || value.isEmpty) {
       return "Konfirmasi password harus diisi";
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/controllers/auth_controller.dart';
 import 'package:my_app/pages/beranda/beranda.dart';
 import 'package:my_app/pages/login/login.dart';
 import 'package:my_app/pages/register/widgets/custom_forms.dart';
@@ -34,7 +35,7 @@ class _RegisterState extends State<Register> {
 
   String? selectedRole;
 
-  final List<String> roles = ['Laki-laki', 'Perempuan'];
+  final List<String> roles = ['Pendonor', 'Penerima'];
 
   @override
   void dispose() {
@@ -152,7 +153,7 @@ class _RegisterState extends State<Register> {
                           title: "Alamat",
                           prefixIcon: Icons.location_on,
                           controller: alamatController,
-                          validator: AppValidator.email,
+                          validator: AppValidator.alamat,
                         ),
                         SizedBox(height: 20),
 
@@ -240,12 +241,50 @@ class _RegisterState extends State<Register> {
 
                   SizedBox(height: 15),
 
-                  custom_button_elevated(
-                    title: "Buat Akun",
-                    onTap: () => Get.to(Login()),
-                  ),
+                  Obx(() {
+                    final authController = AuthController.instance;
+                    return authController.isLoading.value
+                        ? const Center(child: CircularProgressIndicator())
+                        : custom_button_elevated(
+                            title: "Buat Akun",
+                            onTap: () async {
+                              if (selectedRole == null) {
+                                Get.snackbar(
+                                  "Pilih Role",
+                                  "Silakan pilih role Pendonor atau Penerima.",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                                return;
+                              }
+                              if (!_formKey.currentState!.validate()) {
+                                return;
+                              }
+                              if (!isCheck) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Harus menyetujui syarat & ketentuan",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
 
-                  SizedBox(height: 15),
+                              final success = await authController.register(
+                                nama: usernameController.text,
+                                email: emailController.text,
+                                password: passwordController.text,
+                                alamat: alamatController.text,
+                                role: selectedRole!,
+                              );
+
+                              if (success) {
+                                Get.off(() => const Login());
+                              }
+                            },
+                          );
+                  }),
+                  const SizedBox(height: 15),
 
                   or(),
 
@@ -255,9 +294,12 @@ class _RegisterState extends State<Register> {
 
                   SizedBox(height: 20),
 
-                  custom_sign_text(
-                    title: "Sudah punya akun? ",
-                    subtitle: "Login",
+                  GestureDetector(
+                    onTap: () => Get.off(() => const Login()),
+                    child: const custom_sign_text(
+                      title: "Sudah punya akun? ",
+                      subtitle: "Login",
+                    ),
                   ),
                 ],
               ),
