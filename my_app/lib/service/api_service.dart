@@ -35,10 +35,7 @@ class ApiService {
     required String password,
   }) async {
     final url = Uri.parse('$baseUrl/api/Login/pendonor');
-    final body = jsonEncode({
-      'email': email,
-      'password': password,
-    });
+    final body = jsonEncode({'email': email, 'password': password});
 
     return await http.post(
       url,
@@ -52,10 +49,7 @@ class ApiService {
     required String password,
   }) async {
     final url = Uri.parse('$baseUrl/api/Login/penerima');
-    final body = jsonEncode({
-      'email': email,
-      'password': password,
-    });
+    final body = jsonEncode({'email': email, 'password': password});
 
     return await http.post(
       url,
@@ -103,6 +97,48 @@ class ApiService {
         'Authorization': 'Bearer $token',
       },
       body: body,
+    );
+  }
+
+  static Future<http.Response> createRequest({
+    required String token,
+    required String namaMakanan,
+    required String kategori,
+    required int jumlah,
+    required String kondisiMakanan,
+    required String statusMakanan,
+    required String halal,
+    required bool isUrgent,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/request');
+    final body = jsonEncode({
+      'nama_makanan': namaMakanan,
+      'jumlah': jumlah,
+      'kategori': kategori,
+      'kondisi_makanan': kondisiMakanan,
+      'status_makanan': statusMakanan,
+      'halal': halal == "Halal",
+      'urgent': isUrgent,
+    });
+
+    return await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: body,
+    );
+  }
+
+  static Future<http.Response> getRequests(String token) async {
+    final url = Uri.parse('$baseUrl/api/request');
+    return await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
     );
   }
 }

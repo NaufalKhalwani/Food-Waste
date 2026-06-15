@@ -6,6 +6,7 @@ import 'package:my_app/controllers/auth_controller.dart';
 import 'package:my_app/pages/admin/admin_dashboard.dart';
 import 'package:my_app/pages/beranda/pendonor_dashboard.dart';
 import 'package:my_app/pages/beranda/penerima_dashboard.dart';
+import 'package:my_app/pages/food_waste/PengajuanDonasiFW.dart';
 import 'package:my_app/pages/food_waste/food_waste_page.dart';
 import 'package:my_app/pages/profile/profile.dart';
 
@@ -20,17 +21,10 @@ class NavigationMenu extends StatelessWidget {
       final role = auth.userRole;
 
       if (role == 'unknown' || role.isEmpty) {
-        return const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
       }
 
-      final controller = Get.put(
-        NavigationController(role: role),
-        tag: role,
-      );
+      final controller = Get.put(NavigationController(role: role), tag: role);
 
       return Scaffold(
         extendBody: true,
@@ -60,9 +54,7 @@ class NavigationMenu extends StatelessWidget {
           ),
         ),
 
-        body: Obx(
-          () => controller.screens[controller.selectedIndex.value],
-        ),
+        body: Obx(() => controller.screens[controller.selectedIndex.value]),
       );
     });
   }
@@ -71,41 +63,23 @@ class NavigationMenu extends StatelessWidget {
 class NavigationController extends GetxController {
   final String role;
 
-  NavigationController({
-    required this.role,
-  });
+  NavigationController({required this.role});
 
   final Rx<int> selectedIndex = 0.obs;
 
   List<Widget> get screens {
     switch (role) {
       case 'pendonor':
-        return [
-          PendonorDashboard(),
-          FoodWastePage(),
-          Profile(),
-        ];
+        return [PendonorDashboard(), FoodWastePage(), Profile()];
 
       case 'penerima':
-        return [
-          PenerimaDashboard(),
-          FoodWastePage(),
-          Profile(),
-        ];
+        return [PenerimaDashboard(), PengajuanDonasiFW(), Profile()];
 
       case 'admin':
-        return [
-          AdminDashboardPage(),
-          FoodWastePage(),
-          Profile(),
-        ];
+        return [AdminDashboardPage(), FoodWastePage(), Profile()];
 
       default:
-        return [
-          PendonorDashboard(),
-          FoodWastePage(),
-          Profile(),
-        ];
+        return [PendonorDashboard(), FoodWastePage(), Profile()];
     }
   }
 
@@ -128,36 +102,18 @@ class NavigationController extends GetxController {
     switch (role) {
       case 'admin':
         return [
-          {
-            'icon': Icons.dashboard,
-            'label': 'Dashboard',
-          },
-          {
-            'icon': Icons.eco,
-            'label': 'Food Waste',
-          },
-          {
-            'icon': Iconsax.user,
-            'label': 'Profile',
-          },
+          {'icon': Icons.dashboard, 'label': 'Dashboard'},
+          {'icon': Icons.eco, 'label': 'Food Waste'},
+          {'icon': Iconsax.user, 'label': 'Profile'},
         ];
 
       case 'pendonor':
       case 'penerima':
       default:
         return [
-          {
-            'icon': Iconsax.home,
-            'label': 'Beranda',
-          },
-          {
-            'icon': Icons.eco,
-            'label': 'Food Waste',
-          },
-          {
-            'icon': Iconsax.user,
-            'label': 'Profile',
-          },
+          {'icon': Iconsax.home, 'label': 'Beranda'},
+          {'icon': Icons.eco, 'label': 'Food Waste'},
+          {'icon': Iconsax.user, 'label': 'Profile'},
         ];
     }
   }

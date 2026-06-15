@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/pages/donasi/donasi.dart';
 
-class PendonorDashboard extends StatelessWidget {
-  const PendonorDashboard({super.key});
+class DonationHistoryPage extends StatelessWidget {
+  const DonationHistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {

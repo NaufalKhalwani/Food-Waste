@@ -176,11 +176,13 @@ func (s StatusRequest) CanTransitionTo(next StatusRequest) bool {
 
 type Request struct {
 	RequestID          string        `gorm:"primaryKey;type:varchar(255);column:request_id" json:"request_id"`
-	IDAdmin            string        `gorm:"type:varchar(255);column:id_admin" json:"id_admin"`
+	IDPenerima         string        `gorm:"type:varchar(255);column:id_penerima" json:"id_penerima"`
 	PenerimaIDPenerima string        `gorm:"type:varchar(255);column:penerimaid_penerima" json:"penerimaid_penerima"`
 	MakananID          string        `gorm:"type:varchar(255);column:makanan_id" json:"makanan_id"`
 	Status             StatusRequest `gorm:"type:varchar(255);column:status" json:"status"`
 	TanggalRequest     *time.Time    `gorm:"autoCreateTime;type:date;column:tanggal_request" json:"tanggal_request"`
+	halal              bool          `gorm:"type:boolean;column:halal" json:"halal"`
+	urgent             bool          `gorm:"type:boolean;column:urgent" json:"urgent"`
 }
 
 func (Request) TableName() string { return "request" }
