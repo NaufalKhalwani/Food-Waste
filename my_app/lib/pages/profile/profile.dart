@@ -18,7 +18,7 @@ class Profile extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xffF4F5F7),
       body: SingleChildScrollView(
-        padding: EdgeInsets.only(bottom: 100),
+        padding: EdgeInsets.only(bottom: 40),
         child: Column(
           children: [
             Container(
@@ -40,98 +40,94 @@ class Profile extends StatelessWidget {
                   bottomRight: Radius.circular(45),
                 ),
               ),
-                child: Obx(() {
-                  final user = auth.currentUser.value;
-                  final userName = user?['nama'] ?? 'User';
-                  final subRole = user?['sub_role'] ?? 'user';
-                  String roleLabel;
-                  if (subRole == 'pendonor') {
-                    roleLabel = 'Food Donor Partner';
-                  } else if (subRole == 'penerima') {
-                    roleLabel = 'Food Recipient';
-                  } else if (subRole == 'admin') {
-                    roleLabel = 'Administrator';
-                  } else {
-                    roleLabel = 'User';
-                  }
-                
-                  return Column(
-                    children: [
-                      const SizedBox(height: 28),
-                
-                      // PROFILE IMAGE
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 3),
+              child: Obx(() {
+                final user = auth.currentUser.value;
+                final userName = user?['nama'] ?? 'User';
+                final subRole = user?['sub_role'] ?? 'user';
+                String roleLabel;
+                if (subRole == 'pendonor') {
+                  roleLabel = 'Food Donor Partner';
+                } else if (subRole == 'penerima') {
+                  roleLabel = 'Food Recipient';
+                } else if (subRole == 'admin') {
+                  roleLabel = 'Administrator';
+                } else {
+                  roleLabel = 'User';
+                }
+
+                return Column(
+                  children: [
+                    const SizedBox(height: 28),
+
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                      ),
+                      child: CircleAvatar(
+                        radius: 48,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          subRole == 'admin'
+                              ? Icons.admin_panel_settings
+                              : Icons.restaurant,
+                          size: 50,
+                          color: const Color(0xff0F52FF),
                         ),
-                        child: CircleAvatar(
-                          radius: 48,
-                          backgroundColor: Colors.white,
-                          child: Icon(
-                            subRole == 'admin' ? Icons.admin_panel_settings : Icons.restaurant,
-                            size: 50,
-                            color: const Color(0xff0F52FF),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // NAME
+                    Text(
+                      userName,
+                      style: Theme.of(context).textTheme.headlineSmall!
+                          .copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Text(
+                      roleLabel,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyLarge!.copyWith(color: Colors.white70),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // STATS
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: ProfileStatCard(
+                            icon: Icons.eco_outlined,
+                            value: "340 Kg",
+                            label: "Sisa Makanan\nDiselamatkan",
                           ),
                         ),
-                      ),
-                
-                      const SizedBox(height: 18),
-                
-                      // NAME
-                      Text(
-                        userName,
-                        style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                
-                      const SizedBox(height: 6),
-                
-                      Text(
-                        roleLabel,
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: Colors.white70,
-                        ),
-                      ),
-                
-                      const SizedBox(height: 30),
-                
-                      // STATS
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: ProfileStatCard(
-                              icon: Icons.eco_outlined,
-                              value: "340 Kg",
-                              label: "Sisa Makanan\nDiselamatkan",
-                            ),
+
+                        const SizedBox(width: 16),
+
+                        const Expanded(
+                          child: ProfileStatCard(
+                            icon: Icons.favorite_outline,
+                            value: "128",
+                            label: "Donasi\nDiterima",
                           ),
-                
-                          const SizedBox(width: 16),
-                
-                          const Expanded(
-                            child: ProfileStatCard(
-                              icon: Icons.favorite_outline,
-                              value: "128",
-                              label: "Donasi\nDiterima",
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                }),
-              ),
-            
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              }),
+            ),
 
             const SizedBox(height: 24),
-
-            // =========================================
-            // MENU
-            // =========================================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22),
               child: Column(
@@ -142,7 +138,7 @@ class Profile extends StatelessWidget {
                     subtitle:
                         "Lihat semua riwayat donasi makanan yang telah diberikan",
                     onTap: () {
-                      Get.to(() => DonationHistoryPage());
+                      Get.to(() => PendonorDashboard());
                     },
                   ),
 
@@ -205,7 +201,7 @@ class Profile extends StatelessWidget {
                     },
                   ),
 
-                SizedBox(height: 30),
+                  SizedBox(height: 30),
                 ],
               ),
             ),
@@ -215,10 +211,6 @@ class Profile extends StatelessWidget {
     );
   }
 }
-
-// =========================================
-// REUSABLE WIDGET
-// =========================================
 
 class ProfileStatCard extends StatelessWidget {
   final IconData icon;

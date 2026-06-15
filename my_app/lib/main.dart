@@ -3,7 +3,6 @@ import 'package:my_app/controllers/auth_controller.dart';
 import 'package:get/get.dart';
 import 'package:my_app/pages/login/login.dart';
 import 'package:my_app/Routes/routes.dart';
-import 'package:my_app/pages/register/register.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +18,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
-      home: Register(),
+      home: Login(),
       initialRoute: AppRoutes.login,
       getPages: AppRoutes.pages,
     );
