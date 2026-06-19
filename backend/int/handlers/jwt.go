@@ -1,12 +1,10 @@
 package handlers
 
-import (
-	"errors"
-	"time"
+import "errors"
+import "time"
+import "anti-food-waste2.0/int/config"
+import "github.com/golang-jwt/jwt/v5"
 
-	"anti-food-waste2.0/int/config"
-	"github.com/golang-jwt/jwt/v5"
-)
 
 // JWTClaims mendefinisikan klaim kustom untuk JWT token kita
 type JWTClaims struct {

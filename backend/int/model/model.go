@@ -1,11 +1,8 @@
 package model
 
-import (
-	"fmt"
-	"time"
-
-	"gorm.io/gorm"
-)
+import "fmt"
+import "time"
+import "gorm.io/gorm"
 
 // parameterization
 type IDField[T any] struct {

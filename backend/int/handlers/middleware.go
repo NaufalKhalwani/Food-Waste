@@ -1,11 +1,8 @@
 package handlers
 
-import (
-	"net/http"
-	"strings"
-
-	"github.com/gin-gonic/gin"
-)
+import "net/http"
+import "strings"
+import "github.com/gin-gonic/gin"
 
 // JWTAuthMiddleware memvalidasi token JWT dari header Authorization dan mengecek hak akses role
 func JWTAuthMiddleware(allowedRoles ...string) gin.HandlerFunc {

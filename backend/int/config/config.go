@@ -1,12 +1,10 @@
 package config
 
-import (
-	"log"     //mencatat log error
-	"os"      //mengakses variabel lingkungan
-	"strconv" //mengkonversi string ke tipe data lain
+import "log"     //mencatat log error
+import "os"      //mengakses variabel lingkungan
+import "strconv" //mengkonversi string ke tipe data lain
+import"github.com/joho/godotenv" //memuat file .env
 
-	"github.com/joho/godotenv" //memuat file .env
-)
 
 type Config struct {
 	DBHost     string

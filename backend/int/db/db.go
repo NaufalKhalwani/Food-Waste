@@ -1,16 +1,13 @@
 package db
 
-import (
-	"fmt" //format string untuk membuat DSN
-	"log" //mencatat log error
+import "fmt" //format string untuk membuat DSN
+import "log" //mencatat log error
+import "anti-food-waste2.0/int/config" // import package config
+import "anti-food-waste2.0/int/model"
+import "gorm.io/driver/postgres" // driver untuk PostgreSQL
+import "gorm.io/gorm"            // ORM untuk Go
+import "gorm.io/gorm/logger"     // logger untuk GORM
 
-	"anti-food-waste2.0/int/config" // import package config
-	// import package models
-	"anti-food-waste2.0/int/model"
-	"gorm.io/driver/postgres" // driver untuk PostgreSQL
-	"gorm.io/gorm"            // ORM untuk Go
-	"gorm.io/gorm/logger"     // logger untuk GORM
-)
 
 var DB *gorm.DB
 
