@@ -9,33 +9,29 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:my_app/controllers/auth_controller.dart';
 import 'package:my_app/controllers/beranda_controller.dart';
-import 'package:my_app/widgets/container_lokasi.dart';
-import 'package:my_app/widgets/upload_foto_widget.dart';
 
-class DonasiPage extends StatefulWidget {
-  const DonasiPage({super.key});
+final TextEditingController catatanController = TextEditingController();
 
+String? selectedPackaging;
+bool isHalal = true;
+bool isUrgent = true;
+
+class PengajuanDonasiPage extends StatefulWidget {
+  const PengajuanDonasiPage({super.key});
   @override
-  State<DonasiPage> createState() => _DonasiPageState();
+  State<PengajuanDonasiPage> createState() => _PengajuanDonasiPageState();
 }
 
-class _DonasiPageState extends State<DonasiPage> {
+class _PengajuanDonasiPageState extends State<PengajuanDonasiPage> {
   final makananController = TextEditingController();
   final porsiController = TextEditingController();
   final dateController = TextEditingController();
-  final categoryController = TextEditingController();
-  final TextEditingController alamatController = TextEditingController();
-  final TextEditingController catatanController = TextEditingController();
-
-  Position? currentPosition;
-  String lokasiText = "Ambil lokasi penjemputan";
-  double? latitude;
-  double? longitude;
 
   final _formKey = GlobalKey<FormState>();
 
   DateTime? selectedDate;
   String? selectedCategory;
+  String halalStatus = "Halal";
 
   Future<void> pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -51,49 +47,6 @@ class _DonasiPageState extends State<DonasiPage> {
         dateController.text = "${picked.day}-${picked.month}-${picked.year}";
       });
     }
-  }
-
-  Future<void> getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
-    if (!serviceEnabled) {
-      Get.snackbar("Lokasi", "Aktifkan GPS terlebih dahulu");
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      Get.snackbar("Lokasi", "Izin lokasi ditolak permanen");
-      return;
-    }
-
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-
-    List<Placemark> placemarks = await placemarkFromCoordinates(
-      position.latitude,
-      position.longitude,
-    );
-
-    Placemark place = placemarks.first;
-
-    setState(() {
-      currentPosition = position;
-
-      latitude = position.latitude;
-      longitude = position.longitude;
-
-      lokasiText = "${place.street}, ${place.subLocality}, ${place.locality}";
-    });
   }
 
   @override
@@ -148,24 +101,18 @@ class _DonasiPageState extends State<DonasiPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      UploadFotoWidget(),
                       SizedBox(height: 10),
                       custom_form_without_labeltext(
-                        title: "Nama Makanan",
-                        subtitle: "Masukan nama makanan",
+                        title: "Jenis Makanan",
+                        subtitle: "Contoh: Nasi Kotak Ayam",
                         controller: makananController,
                       ),
                       SizedBox(height: 10),
                       custom_form_without_labeltext(
                         title: "Jumlah Porsi",
-                        subtitle: "0",
+                        subtitle: "Contoh: 5",
                         controller: porsiController,
                         keyboardType: TextInputType.number,
-                      ),
-                      SizedBox(height: 10),
-                      DateField(
-                        controller: dateController,
-                        onTap: () => pickDate(context),
                       ),
                       SizedBox(height: 10),
                       CustomDropdown(
@@ -177,70 +124,91 @@ class _DonasiPageState extends State<DonasiPage> {
                           });
                         },
                       ),
-                      SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.all(16),
+                      SizedBox(height: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Status Halal",
+                            style: Theme.of(context).textTheme.bodyLarge!
+                                .copyWith(fontWeight: FontWeight.w700),
+                          ),
 
+                          const SizedBox(height: 10),
+
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.grey.shade300),
+                            ),
+                            child: Column(
+                              children: [
+                                RadioListTile<String>(
+                                  title: const Text("Halal"),
+                                  value: "Halal",
+                                  groupValue: halalStatus,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      halalStatus = value!;
+                                    });
+                                  },
+                                ),
+
+                                RadioListTile<String>(
+                                  title: const Text("Non Halal"),
+                                  value: "Non Halal",
+                                  groupValue: halalStatus,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      halalStatus = value!;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      const SizedBox(height: 15),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(color: Colors.grey.shade300),
                         ),
-
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Lokasi Penjemputan",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.location_on,
-                                  color: Color(0xff0F52FF),
-                                ),
-
-                                const SizedBox(width: 10),
-
-                                Expanded(
-                                  child: Text(
-                                    lokasiText,
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 15),
-
-                            SizedBox(
-                              width: double.infinity,
-
-                              child: ElevatedButton.icon(
-                                onPressed: getCurrentLocation,
-
-                                icon: const Icon(
-                                  Icons.my_location,
-                                  color: const Color(0xff0F52FF),
-                                ),
-
-                                label: const Text(
-                                  "Gunakan Lokasi Saat Ini",
-                                  style: TextStyle(
-                                    color: const Color(0xff0F52FF),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text(
+                            "Kebutuhan Mendesak",
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          subtitle: Text(
+                            isUrgent
+                                ? "Perlu segera dijemput"
+                                : "Tidak mendesak",
+                          ),
+                          value: isUrgent,
+                          onChanged: (value) {
+                            setState(() {
+                              isUrgent = value;
+                            });
+                          },
                         ),
                       ),
+
                       SizedBox(height: 20),
+                      const SizedBox(height: 15),
                       TextButton(
-                          onPressed: () async {
+                        onPressed: () async {
                           final auth = AuthController.instance;
                           if (auth.currentUser.value == null) {
                             Get.snackbar(
@@ -250,10 +218,10 @@ class _DonasiPageState extends State<DonasiPage> {
                             return;
                           }
                           if (auth.currentUser.value!['sub_role'] !=
-                              'pendonor') {
+                              'penerima') {
                             Get.snackbar(
                               "Akses Ditolak",
-                              "Hanya Pendonor yang dapat mendonasikan makanan.",
+                              "Hanya Penerima yang dapat mendonasikan makanan.",
                               snackPosition: SnackPosition.BOTTOM,
                             );
                             return;
@@ -286,17 +254,8 @@ class _DonasiPageState extends State<DonasiPage> {
                             );
                             return;
                           }
-
-                          if (selectedDate == null) {
-                            Get.snackbar(
-                              "Gagal",
-                              "Pilih batas waktu konsumsi.",
-                              snackPosition: SnackPosition.BOTTOM,
-                            );
-                            return;
-                          }
-
                           // Show loading spinner
+
                           Get.dialog(
                             const Center(child: CircularProgressIndicator()),
                             barrierDismissible: false,
@@ -304,7 +263,7 @@ class _DonasiPageState extends State<DonasiPage> {
 
                           try {
                             final url = Uri.parse(
-                              '${auth.baseUrl}/api/makanan',
+                              '${auth.baseUrl}/api/request',
                             );
                             final body = {
                               'nama_makanan': makananController.text.trim(),
@@ -312,9 +271,8 @@ class _DonasiPageState extends State<DonasiPage> {
                               'kategori': selectedCategory,
                               'kondisi_makanan': 'Baik',
                               'status_makanan': 'tersedia',
-                              'tanggal_kadaluarsa': selectedDate!
-                                  .toUtc()
-                                  .toIso8601String(),
+                              'halal': halalStatus == "Halal",
+                              'urgent': isUrgent,
                             };
 
                             final response = await http.post(
@@ -329,7 +287,7 @@ class _DonasiPageState extends State<DonasiPage> {
                                 response.statusCode == 200) {
                               Get.snackbar(
                                 "Sukses",
-                                "Donasi makanan berhasil dibuat!",
+                                "Ajukan donasi makanan berhasil dibuat!",
                                 snackPosition: SnackPosition.BOTTOM,
                               );
                               // Refresh home page data
@@ -364,16 +322,16 @@ class _DonasiPageState extends State<DonasiPage> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Text(
-                            "Donasi",
+                            "Ajukan Donasi",
                             style: Theme.of(context).textTheme.headlineSmall!
                                 .copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20,
                                 ),
-    ),
-  ),
-),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

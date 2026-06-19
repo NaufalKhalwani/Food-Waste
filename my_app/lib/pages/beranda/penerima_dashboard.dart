@@ -4,7 +4,7 @@ import 'package:my_app/controllers/auth_controller.dart';
 import 'package:my_app/controllers/beranda_controller.dart';
 import 'package:my_app/pages/beranda/jadwal_jemput.dart';
 import 'package:my_app/pages/beranda/riwayat.dart';
-import 'package:my_app/pages/donasi/donasi.dart';
+import 'package:my_app/pages/donasi/PengajuanDonasiPage.dart';
 
 class PenerimaDashboard extends StatefulWidget {
   const PenerimaDashboard({super.key});
@@ -87,7 +87,7 @@ class _PenerimaDashboardState extends State<PenerimaDashboard> {
                       SizedBox(height: 5),
                       RichText(
                         text: TextSpan(
-                          text: "Kami Menyediakan\n ",
+                          text: "Selamat datang wahai pendonor yang agung ",
                           style: TextStyle(
                             color: Colors.grey,
                             fontWeight: FontWeight.w500,
@@ -103,7 +103,7 @@ class _PenerimaDashboardState extends State<PenerimaDashboard> {
                   ),
                 ),
                 SizedBox(height: 20),
-                addDonation(onTap: () => Get.to(() => DonasiPage())),
+                addDonation(onTap: () => Get.to(() => PengajuanDonasiPage())),
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -440,7 +440,7 @@ class addDonation extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Buat Donasi baru",
+                  "Ajukan permintaan donasi",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -448,7 +448,7 @@ class addDonation extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "Berbagi makanan untuk\nmengurangi Food Waste berlebih",
+                  "Bantu kami mengurangi food waste",
                   style: TextStyle(
                     color: const Color.fromARGB(255, 236, 236, 236),
                   ),

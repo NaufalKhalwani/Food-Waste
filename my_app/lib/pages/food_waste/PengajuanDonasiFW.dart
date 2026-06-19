@@ -8,10 +8,11 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_app/controllers/auth_controller.dart';
 import 'package:my_app/controllers/beranda_controller.dart';
+import 'package:my_app/controllers/request_controller.dart';
 import 'package:my_app/pages/food_waste/donation_status_page.dart';
 
-class FoodWastePage extends StatelessWidget {
-  const FoodWastePage({super.key});
+class PengajuanDonasiFW extends StatelessWidget {
+  const PengajuanDonasiFW({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +50,7 @@ class FoodWastePage extends StatelessWidget {
                     children: [
                       // TITLE
                       Text(
-                        "Food Waste Rescue",
+                        "Riwayat Donasi Makanan",
                         style: Theme.of(context).textTheme.headlineSmall!
                             .copyWith(
                               color: Colors.white,
@@ -60,7 +61,7 @@ class FoodWastePage extends StatelessWidget {
                       const SizedBox(height: 8),
 
                       Text(
-                        "Temukan makanan layak konsumsi yang siap didonasikan",
+                        "Lihat riwayat donasi makanan Anda",
                         style: Theme.of(
                           context,
                         ).textTheme.bodyLarge!.copyWith(color: Colors.white70),
@@ -169,7 +170,7 @@ class FoodWastePage extends StatelessWidget {
                     return Column(
                       children: [
                         ...list.map((item) {
-                          final makananId = item['makanan_id'] ?? '';
+                          final RequestID = item['RequestID'] ?? '';
                           final foodName = item['nama_makanan'] ?? 'Makanan';
                           final qty = item['jumlah'] ?? 0;
                           final donor = item['id_donor'] ?? 'Donatur';
@@ -241,7 +242,7 @@ class FoodWastePage extends StatelessWidget {
                                 final response = await http.post(
                                   url,
                                   headers: auth.headers,
-                                  body: jsonEncode({'makanan_id': makananId}),
+                                  body: jsonEncode({'request_id': RequestID}),
                                 );
 
                                 Get.back();
@@ -491,5 +492,37 @@ class FoodDonationCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class RequestController extends GetxController {
+  static RequestController get instance => Get.find();
+
+  final requests = <dynamic>[].obs;
+  final isLoading = false.obs;
+
+  Future<void> fetchRequests() async {
+    try {
+      isLoading.value = true;
+
+      final auth = AuthController.instance;
+
+      final response = await http.get(
+        Uri.parse('${auth.baseUrl}/api/request'),
+        headers: auth.headers,
+      );
+
+      if (response.statusCode == 200) {
+        requests.value = jsonDecode(response.body);
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  @override
+  void onInit() {
+    fetchRequests();
+    super.onInit();
   }
 }

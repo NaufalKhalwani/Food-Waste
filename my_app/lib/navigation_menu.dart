@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+
 import 'package:my_app/controllers/auth_controller.dart';
-import 'package:my_app/pages/food_waste/food_waste_page.dart';
+import 'package:my_app/pages/admin/admin_dashboard.dart';
 import 'package:my_app/pages/beranda/pendonor_dashboard.dart';
 import 'package:my_app/pages/beranda/penerima_dashboard.dart';
-import 'package:my_app/pages/admin/admin_dashboard.dart';
+import 'package:my_app/pages/food_waste/PengajuanDonasiFW.dart';
+import 'package:my_app/pages/food_waste/food_waste_page.dart';
 import 'package:my_app/pages/profile/profile.dart';
 
 class NavigationMenu extends StatelessWidget {
@@ -18,7 +20,6 @@ class NavigationMenu extends StatelessWidget {
     return Obx(() {
       final role = auth.userRole;
 
-      // Tunggu sampai role siap
       if (role == 'unknown' || role.isEmpty) {
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       }
@@ -28,6 +29,7 @@ class NavigationMenu extends StatelessWidget {
       return Scaffold(
         extendBody: true,
         backgroundColor: Colors.transparent,
+
         floatingActionButton: role == 'admin'
             ? FloatingActionButton(
                 onPressed: () => Get.to(() => AdminDashboardPage()),
@@ -38,42 +40,20 @@ class NavigationMenu extends StatelessWidget {
                 ),
               )
             : null,
+
         bottomNavigationBar: Obx(
-          () => Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 20,
-                  spreadRadius: 1,
-                  offset: const Offset(0, -8),
-                ),
-              ],
-            ),
-            child: NavigationBar(
-              height: 80,
-              elevation: 0,
-              indicatorColor: Colors.transparent,
-              selectedIndex: controller.selectedIndex.value,
-              backgroundColor: Colors.white,
-              onDestinationSelected: (index) =>
-                  controller.selectedIndex.value = index,
-              labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return const TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
-                  );
-                }
-                return const TextStyle(color: Colors.grey);
-              }),
-              destinations: controller.destinations(
-                controller.selectedIndex.value,
-              ),
+          () => NavigationBar(
+            height: 80,
+            selectedIndex: controller.selectedIndex.value,
+            onDestinationSelected: (index) {
+              controller.selectedIndex.value = index;
+            },
+            destinations: controller.destinations(
+              controller.selectedIndex.value,
             ),
           ),
         ),
+
         body: Obx(() => controller.screens[controller.selectedIndex.value]),
       );
     });
@@ -82,6 +62,7 @@ class NavigationMenu extends StatelessWidget {
 
 class NavigationController extends GetxController {
   final String role;
+
   NavigationController({required this.role});
 
   final Rx<int> selectedIndex = 0.obs;
@@ -90,10 +71,13 @@ class NavigationController extends GetxController {
     switch (role) {
       case 'pendonor':
         return [PendonorDashboard(), FoodWastePage(), Profile()];
+
       case 'penerima':
-        return [PenerimaDashboard(), FoodWastePage(), Profile()];
+        return [PenerimaDashboard(), PengajuanDonasiFW(), Profile()];
+
       case 'admin':
         return [AdminDashboardPage(), FoodWastePage(), Profile()];
+
       default:
         return [PendonorDashboard(), FoodWastePage(), Profile()];
     }
@@ -103,6 +87,7 @@ class NavigationController extends GetxController {
     return _tabsForRole().asMap().entries.map((entry) {
       final i = entry.key;
       final tab = entry.value;
+
       return NavigationDestination(
         icon: Icon(
           tab['icon'] as IconData,
@@ -115,24 +100,15 @@ class NavigationController extends GetxController {
 
   List<Map<String, dynamic>> _tabsForRole() {
     switch (role) {
-      case 'pendonor':
-        return [
-          {'icon': Iconsax.home, 'label': 'Beranda'},
-          {'icon': Icons.eco, 'label': 'Food Waste'},
-          {'icon': Iconsax.user, 'label': 'Profile'},
-        ];
-      case 'penerima':
-        return [
-          {'icon': Iconsax.home, 'label': 'Beranda'},
-          {'icon': Icons.eco, 'label': 'Food Waste'},
-          {'icon': Iconsax.user, 'label': 'Profile'},
-        ];
       case 'admin':
         return [
           {'icon': Icons.dashboard, 'label': 'Dashboard'},
           {'icon': Icons.eco, 'label': 'Food Waste'},
           {'icon': Iconsax.user, 'label': 'Profile'},
         ];
+
+      case 'pendonor':
+      case 'penerima':
       default:
         return [
           {'icon': Iconsax.home, 'label': 'Beranda'},

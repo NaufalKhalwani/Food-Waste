@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:my_app/controllers/auth_controller.dart';
 import 'package:my_app/pages/admin/active_donation.dart';
@@ -93,6 +93,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xff0F52FF),
         onPressed: () {
+          Get.snackbar("Refresh", "Data berhasil diperbarui");
           _fetchData();
           Get.snackbar("Refresh", "Data sedang diperbarui...");
         },
@@ -450,6 +451,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 }
 
+
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});
 
@@ -473,12 +475,6 @@ class HistoryPage extends StatelessWidget {
 }
 
 class StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
   const StatCard({
     super.key,
     required this.title,
@@ -487,6 +483,12 @@ class StatCard extends StatelessWidget {
     required this.color,
     required this.onTap,
   });
+
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

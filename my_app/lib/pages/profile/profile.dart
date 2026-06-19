@@ -13,14 +13,13 @@ class Profile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = AuthController.instance;
-
     return Scaffold(
       backgroundColor: const Color(0xffF4F5F7),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 100),
+        padding: const EdgeInsets.only(bottom: 40),
         child: Column(
           children: [
+            // ===================== HEADER =====================
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(
@@ -41,25 +40,60 @@ class Profile extends StatelessWidget {
                 ),
               ),
               child: Obx(() {
-                final user = auth.currentUser.value;
+                final user = AuthController.instance.currentUser.value;
                 final userName = user?['nama'] ?? 'User';
                 final subRole = user?['sub_role'] ?? 'user';
+
+                // ---- Konten dinamis sesuai role ----
                 String roleLabel;
-                if (subRole == 'pendonor') {
-                  roleLabel = 'Food Donor Partner';
-                } else if (subRole == 'penerima') {
-                  roleLabel = 'Food Recipient';
-                } else if (subRole == 'admin') {
-                  roleLabel = 'Administrator';
-                } else {
-                  roleLabel = 'User';
+                IconData avatarIcon;
+                IconData stat1Icon;
+                String stat1Value;
+                String stat1Label;
+                IconData stat2Icon;
+                String stat2Value;
+                String stat2Label;
+
+                switch (subRole) {
+                  case 'penerima':
+                    roleLabel = 'Food Recipient';
+                    avatarIcon = Icons.volunteer_activism;
+                    stat1Icon = Icons.inventory_2_outlined;
+                    stat1Value = "45";
+                    stat1Label = "Donasi\nDiterima";
+                    stat2Icon = Icons.pending_actions_outlined;
+                    stat2Value = "3";
+                    stat2Label = "Permintaan\nAktif";
+                    break;
+
+                  case 'admin':
+                    roleLabel = 'Administrator';
+                    avatarIcon = Icons.admin_panel_settings;
+                    stat1Icon = Icons.people_outline;
+                    stat1Value = "1.2K";
+                    stat1Label = "Total\nPengguna";
+                    stat2Icon = Icons.verified_outlined;
+                    stat2Value = "340";
+                    stat2Label = "Donasi\nTerverifikasi";
+                    break;
+
+                  case 'pendonor':
+                  default:
+                    roleLabel = 'Food Donor Partner';
+                    avatarIcon = Icons.restaurant;
+                    stat1Icon = Icons.eco_outlined;
+                    stat1Value = "340 Kg";
+                    stat1Label = "Sisa Makanan\nDiselamatkan";
+                    stat2Icon = Icons.favorite_outline;
+                    stat2Value = "128";
+                    stat2Label = "Donasi\nDiterima";
+                    break;
                 }
 
                 return Column(
                   children: [
                     const SizedBox(height: 28),
 
-                    // PROFILE IMAGE
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -70,31 +104,32 @@ class Profile extends StatelessWidget {
                         radius: 48,
                         backgroundColor: Colors.white,
                         child: Icon(
-                          subRole == 'admin' ? Icons.admin_panel_settings : Icons.restaurant,
+                          avatarIcon,
                           size: 50,
                           color: const Color(0xff0F52FF),
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 18),
 
                     // NAME
                     Text(
                       userName,
-                      style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall!
+                          .copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
 
                     const SizedBox(height: 6),
 
+                    // ROLE LABEL
                     Text(
                       roleLabel,
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                        color: Colors.white70,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyLarge!.copyWith(color: Colors.white70),
                     ),
 
                     const SizedBox(height: 30),
@@ -102,21 +137,19 @@ class Profile extends StatelessWidget {
                     // STATS
                     Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: ProfileStatCard(
-                            icon: Icons.eco_outlined,
-                            value: "340 Kg",
-                            label: "Sisa Makanan\nDiselamatkan",
+                            icon: stat1Icon,
+                            value: stat1Value,
+                            label: stat1Label,
                           ),
                         ),
-
                         const SizedBox(width: 16),
-
-                        const Expanded(
+                        Expanded(
                           child: ProfileStatCard(
-                            icon: Icons.favorite_outline,
-                            value: "128",
-                            label: "Donasi\nDiterima",
+                            icon: stat2Icon,
+                            value: stat2Value,
+                            label: stat2Label,
                           ),
                         ),
                       ],
@@ -128,85 +161,124 @@ class Profile extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // =========================================
-            // MENU
-            // =========================================
+            // ===================== MENU =====================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22),
-              child: Column(
-                children: [
-                  ProfileMenuItem(
-                    icon: Icons.history,
-                    title: "Riwayat Donasi",
-                    subtitle:
-                        "Lihat semua riwayat donasi makanan yang telah diberikan",
-                    onTap: () {
-                      Get.to(() => DonationHistoryPage());
-                    },
-                  ),
+              child: Obx(() {
+                final user = AuthController.instance.currentUser.value;
+                final subRole = user?['sub_role'] ?? 'user';
 
-                  ProfileMenuItem(
-                    icon: Icons.fastfood_outlined,
-                    title: "Makanan Terselamatkan",
-                    subtitle:
-                        "Pantau total sisa makanan yang berhasil disalurkan",
-                    onTap: () {
-                      Get.to(() => SavedFoodPage());
-                    },
-                  ),
-
-                  ProfileMenuItem(
-                    icon: Icons.groups_outlined,
-                    title: "Donasi Diterima",
-                    subtitle:
-                        "Lihat jumlah donasi yang diterima penerima manfaat",
-                    onTap: () {
-                      Get.to(() => DonationReceivedPage());
-                    },
-                  ),
-
-                  ProfileMenuItem(
-                    icon: Icons.settings_outlined,
-                    title: "Pengaturan Akun",
-                    subtitle: "Kelola informasi akun dan preferensi aplikasi",
-                    onTap: () {
-                      Get.to(() => AccountSettingsPage());
-                    },
-                  ),
-
-                  ProfileMenuItem(
-                    icon: Icons.support_agent_outlined,
-                    title: "Pusat Bantuan",
-                    subtitle: "Butuh bantuan? Hubungi kami atau lihat FAQ",
-                    onTap: () {
-                      Get.to(() => HelpCenterPage());
-                    },
-                  ),
-
-                  // LOGOUT BUTTON
-                  ProfileMenuItem(
-                    icon: Icons.logout,
-                    title: "Keluar",
-                    subtitle: "Keluar dari akun Anda",
-                    onTap: () {
-                      Get.defaultDialog(
-                        title: "Konfirmasi Logout",
-                        middleText: "Apakah Anda yakin ingin keluar?",
-                        textConfirm: "Ya, Keluar",
-                        textCancel: "Batal",
-                        confirmTextColor: Colors.white,
-                        buttonColor: Colors.red,
-                        onConfirm: () {
-                          auth.logout();
-                          Get.offAll(() => const Login());
+                return Column(
+                  children: [
+                    // ---- Menu khusus PENDONOR ----
+                    if (subRole == 'pendonor') ...[
+                      ProfileMenuItem(
+                        icon: Icons.history,
+                        title: "Riwayat Donasi",
+                        subtitle:
+                            "Lihat semua riwayat donasi makanan yang telah diberikan",
+                        onTap: () {
+                          Get.to(() => DonationHistoryPage());
                         },
-                      );
-                    },
-                  ),
+                      ),
+                      ProfileMenuItem(
+                        icon: Icons.fastfood_outlined,
+                        title: "Makanan Terselamatkan",
+                        subtitle:
+                            "Pantau total sisa makanan yang berhasil disalurkan",
+                        onTap: () {
+                          Get.to(() => SavedFoodPage());
+                        },
+                      ),
+                    ],
 
-                  const SizedBox(height: 30),
-                ],
-              ),
+                    // ---- Menu khusus PENERIMA ----
+                    if (subRole == 'penerima') ...[
+                      ProfileMenuItem(
+                        icon: Icons.inventory_2_outlined,
+                        title: "Donasi Diterima",
+                        subtitle:
+                            "Lihat riwayat donasi makanan yang telah Anda terima",
+                        onTap: () {
+                          Get.to(() => DonationReceivedPage());
+                        },
+                      ),
+                      ProfileMenuItem(
+                        icon: Icons.assignment_outlined,
+                        title: "Permintaan Saya",
+                        subtitle:
+                            "Pantau status permintaan bantuan makanan Anda",
+                        onTap: () {
+                          // TODO: arahkan ke halaman permintaan penerima
+                        },
+                      ),
+                    ],
+
+                    // ---- Menu khusus ADMIN ----
+                    if (subRole == 'admin') ...[
+                      ProfileMenuItem(
+                        icon: Icons.groups_outlined,
+                        title: "Kelola Pengguna",
+                        subtitle: "Lihat dan kelola data pendonor & penerima",
+                        onTap: () {
+                          // TODO: arahkan ke halaman manajemen user
+                        },
+                      ),
+                      ProfileMenuItem(
+                        icon: Icons.bar_chart_outlined,
+                        title: "Laporan Donasi",
+                        subtitle:
+                            "Pantau statistik donasi dan distribusi makanan",
+                        onTap: () {
+                          // TODO: arahkan ke halaman laporan
+                        },
+                      ),
+                    ],
+
+                    // ---- Menu yang sama untuk semua role ----
+                    ProfileMenuItem(
+                      icon: Icons.settings_outlined,
+                      title: "Pengaturan Akun",
+                      subtitle: "Kelola informasi akun dan preferensi aplikasi",
+                      onTap: () {
+                        Get.to(() => AccountSettingsPage());
+                      },
+                    ),
+
+                    ProfileMenuItem(
+                      icon: Icons.support_agent_outlined,
+                      title: "Pusat Bantuan",
+                      subtitle: "Butuh bantuan? Hubungi kami atau lihat FAQ",
+                      onTap: () {
+                        Get.to(() => HelpCenterPage());
+                      },
+                    ),
+
+                    // LOGOUT BUTTON
+                    ProfileMenuItem(
+                      icon: Icons.logout,
+                      title: "Keluar",
+                      subtitle: "Keluar dari akun Anda",
+                      onTap: () {
+                        Get.defaultDialog(
+                          title: "Konfirmasi Logout",
+                          middleText: "Apakah Anda yakin ingin keluar?",
+                          textConfirm: "Ya, Keluar",
+                          textCancel: "Batal",
+                          confirmTextColor: Colors.white,
+                          buttonColor: Colors.red,
+                          onConfirm: () {
+                            AuthController.instance.logout();
+                            Get.offAll(() => const Login());
+                          },
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 30),
+                  ],
+                );
+              }),
             ),
           ],
         ),
@@ -214,10 +286,6 @@ class Profile extends StatelessWidget {
     );
   }
 }
-
-// =========================================
-// REUSABLE WIDGET
-// =========================================
 
 class ProfileStatCard extends StatelessWidget {
   final IconData icon;
@@ -247,9 +315,7 @@ class ProfileStatCard extends StatelessWidget {
             backgroundColor: Colors.white.withOpacity(0.15),
             child: Icon(icon, color: Colors.white),
           ),
-
           const SizedBox(height: 10),
-
           Text(
             value,
             style: Theme.of(context).textTheme.headlineMedium!.copyWith(
@@ -257,9 +323,7 @@ class ProfileStatCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 8),
-
           Text(
             label,
             textAlign: TextAlign.center,
@@ -310,9 +374,7 @@ class ProfileMenuItem extends StatelessWidget {
               ),
               child: Icon(icon, size: 30, color: const Color(0xff0F52FF)),
             ),
-
             const SizedBox(width: 18),
-
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,9 +386,7 @@ class ProfileMenuItem extends StatelessWidget {
                       color: const Color(0xff111827),
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   Text(
                     subtitle,
                     style: Theme.of(context).textTheme.bodyLarge!.copyWith(
@@ -337,9 +397,7 @@ class ProfileMenuItem extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(width: 10),
-
             const Icon(
               Icons.arrow_forward_ios_rounded,
               color: Colors.grey,
