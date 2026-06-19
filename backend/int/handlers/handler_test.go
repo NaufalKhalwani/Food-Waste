@@ -10,7 +10,6 @@ import (
 	"anti-food-waste2.0/int/config"
 	"anti-food-waste2.0/int/db"
 	"anti-food-waste2.0/int/model"
-
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
