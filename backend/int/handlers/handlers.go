@@ -1,11 +1,15 @@
 package handlers
 
-import "net/http" // untuk status code HTTP
-import "time"
-import "anti-food-waste2.0/int/db"    // import package database
-import "anti-food-waste2.0/int/model" // import package model
-import "github.com/gin-gonic/gin" // import framework Gin
-import "golang.org/x/crypto/bcrypt"
+import (
+	"net/http" // untuk status code HTTP
+	"time"
+
+	"anti-food-waste2.0/int/db"    // import package database
+	"anti-food-waste2.0/int/model" // import package model
+
+	"github.com/gin-gonic/gin" // import framework Gin
+	"golang.org/x/crypto/bcrypt"
+)
 
 func CreatePendonor(c *gin.Context) { // handler pendonor
 	var input model.Pendonor
@@ -180,12 +184,6 @@ func DeletePendonor(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Pendonor berhasil dihapus"})
 }
 
-func DeletePendonors(c *gin.Context) {
-	var pendonors []model.Pendonor
-	db.DB.Find(&pendonors)
-	c.JSON(http.StatusOK, pendonors)
-}
-
 func DeletePenerima(c *gin.Context) {
 	id := c.Param("id_penerima")
 	if err := db.DB.Where("id_penerima = ?", id).Delete(&model.Penerima{}).Error; err != nil {
@@ -195,25 +193,27 @@ func DeletePenerima(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Penerima berhasil dihapus"})
 }
 
-func DeletePenerimas(c *gin.Context) {
-	var penerimas []model.Penerima
-	db.DB.Find(&penerimas)
-	c.JSON(http.StatusOK, penerimas)
-}
-
 func DeleteRequest(c *gin.Context) {
-	id := c.Param("id_request")
-	if err := db.DB.Where("id_request = ?", id).Delete(&model.Request{}).Error; err != nil {
+	id := c.Param("request_id") // ← sesuaikan dengan nama di route
+	if err := db.DB.Where("request_id = ?", id).Delete(&model.Request{}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Request berhasil dihapus"})
 }
 
-func DeleteRequests(c *gin.Context) {
-	var requests []model.Request
-	db.DB.Find(&requests)
-	c.JSON(http.StatusOK, requests)
+func UpdateRequest(c *gin.Context) {
+	id := c.Param("request_id") // ← sesuaikan dengan nama di route
+	var input model.Request
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := db.DB.Model(&model.Request{}).Where("request_id = ?", id).Updates(input).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Request berhasil diperbarui"})
 }
 
 func DeleteMakanan(c *gin.Context) {
@@ -225,12 +225,6 @@ func DeleteMakanan(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Makanan berhasil dihapus"})
 }
 
-func DeleteMakanans(c *gin.Context) {
-	var makanans []model.Makanan
-	db.DB.Find(&makanans)
-	c.JSON(http.StatusOK, makanans)
-}
-
 func DeletePenyimpanan(c *gin.Context) {
 	id := c.Param("penyimpanan_id")
 	if err := db.DB.Where("penyimpanan_id = ?", id).Delete(&model.Penyimpanan{}).Error; err != nil {
@@ -238,12 +232,6 @@ func DeletePenyimpanan(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Penyimpanan berhasil dihapus"})
-}
-
-func DeletePenyimpanans(c *gin.Context) {
-	var penyimpanans []model.Penyimpanan
-	db.DB.Find(&penyimpanans)
-	c.JSON(http.StatusOK, penyimpanans)
 }
 
 func UpdatePendonor(c *gin.Context) {
@@ -272,20 +260,6 @@ func UpdatePenerima(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Penerima berhasil diperbarui"})
-}
-
-func UpdateRequest(c *gin.Context) {
-	id := c.Param("id_request")
-	var input model.Request
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if err := db.DB.Model(&model.Request{}).Where("id_request = ?", id).Updates(input).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Request berhasil diperbarui"})
 }
 
 func UpdateMakanan(c *gin.Context) {
