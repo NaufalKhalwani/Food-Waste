@@ -1,25 +1,23 @@
 package handlers
 
-import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"strings"
-	"sync/atomic"
-	"testing"
-	"time"
+import "encoding/json"
+import "fmt"
+import "net/http"
+import "net/http/httptest"
+import "os"
+import "strings"
+import "sync/atomic"
+import "testing"
+import "time"
+import "anti-food-waste2.0/int/config"
+import "anti-food-waste2.0/int/db"
+import "anti-food-waste2.0/int/model"
+import "github.com/gin-gonic/gin"
+import "github.com/glebarez/sqlite"
+import "github.com/stretchr/testify/assert"
+import "golang.org/x/crypto/bcrypt"
+import "gorm.io/gorm"
 
-	"anti-food-waste2.0/int/config"
-	"anti-food-waste2.0/int/db"
-	"anti-food-waste2.0/int/model"
-	"github.com/gin-gonic/gin"
-	"github.com/glebarez/sqlite"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
-)
 
 var seedCounter int64
 

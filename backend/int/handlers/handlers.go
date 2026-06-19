@@ -1,15 +1,12 @@
 package handlers
 
-import (
-	"net/http" // untuk status code HTTP
-	"time"
+import "net/http" // untuk status code HTTP
+import "time"
+import "anti-food-waste2.0/int/db"    // import package database
+import "anti-food-waste2.0/int/model" // import package model
+import "github.com/gin-gonic/gin" // import framework Gin
+import "golang.org/x/crypto/bcrypt"
 
-	"anti-food-waste2.0/int/db"    // import package database
-	"anti-food-waste2.0/int/model" // import package model
-
-	"github.com/gin-gonic/gin" // import framework Gin
-	"golang.org/x/crypto/bcrypt"
-)
 
 func CreatePendonor(c *gin.Context) { // handler pendonor
 	var input model.Pendonor

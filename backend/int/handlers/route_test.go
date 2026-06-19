@@ -1,14 +1,12 @@
 package handlers
 
-import (
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
+import "net/http"
+import "net/http/httptest"
+import "strings"
+import "testing"
+import "github.com/gin-gonic/gin"
+import "github.com/stretchr/testify/assert"
 
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
-)
 
 func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
