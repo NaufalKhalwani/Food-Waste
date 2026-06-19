@@ -14,7 +14,6 @@ import (
 	"anti-food-waste2.0/int/config"
 	"anti-food-waste2.0/int/db"
 	"anti-food-waste2.0/int/model"
-
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
@@ -545,7 +544,7 @@ func TestAksesTolakTanpaToken(t *testing.T) {
 }
 
 // PENDONOR
-func TestCreatePendonor(t *testing.T) {
+func TestCreatePendonors(t *testing.T) {
 	db.DB.Exec("DELETE FROM pendonor")
 
 	gin.SetMode(gin.TestMode)
@@ -567,7 +566,7 @@ func TestCreatePendonor(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, w.Code)
 }
 
-func TestGetPendonor(t *testing.T) {
+func TestGetPendonors(t *testing.T) {
 	db.DB.Exec("DELETE FROM pendonor")
 
 	gin.SetMode(gin.TestMode)
@@ -586,7 +585,7 @@ func TestGetPendonor(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-func TestLoginPendonor(t *testing.T) {
+func TestLoginPendonors(t *testing.T) {
 	db.DB.Exec("DELETE FROM pendonor")
 
 	gin.SetMode(gin.TestMode)
